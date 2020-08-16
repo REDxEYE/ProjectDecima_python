@@ -19,9 +19,13 @@ known_magics = {
 
 class CoreFile:
 
-    def __init__(self, filepath: Union[str, Path]):
-        self.filepath = Path(filepath)
-        self.reader = ByteIODS(filepath)
+    def __init__(self, filepath: Union[str, Path, bytes], real_path: Union[str, Path] = ""):
+        if isinstance(filepath, bytes):
+            self.reader = ByteIODS(filepath)
+            self.filepath = Path(real_path)
+        else:
+            self.filepath = Path(filepath)
+            self.reader = ByteIODS(filepath)
         self.entries: List[CoreDummy] = []
 
     @staticmethod
