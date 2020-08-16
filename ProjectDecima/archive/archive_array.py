@@ -22,6 +22,9 @@ class ArchiveSet:
             self.hash_to_archive.update({k: archive for k in archive.hash_to_entry.keys()})
 
     def queue_file(self, file_id: Union[str, int], is_core_file=True):
+        if isinstance(file_id, str):
+            if file_id.rfind('.') == -1:
+                file_id += '.core' if is_core_file else '.core.stream'
         archive = self.hash_to_archive.get(hash_string(file_id), None)
         if archive:
-            return archive.queue_file(file_id,is_core_file)
+            return archive.queue_file(file_id, is_core_file)

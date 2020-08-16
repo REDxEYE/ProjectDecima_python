@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from ProjectDecima.archive.archive_array import ArchiveSet
+from ProjectDecima.core.entry_reference import EntryReference
 from ProjectDecima.core_file import CoreFile
 from ProjectDecima.archive.archive import Archive
 
@@ -30,7 +31,10 @@ def test_archive_set():
     arch_set = ArchiveSet(work_dir)
     arch_set.parse_all()
     a = arch_set.queue_file("ds/models/characters/sam_sam/core/sam_body_naked/model/parts/mesh_bodynaked_lx.core")
-    print(a)
+    if a:
+        a.parse()
+        EntryReference.resolve(a, arch_set)
+        print(a)
 
 
 if __name__ == '__main__':

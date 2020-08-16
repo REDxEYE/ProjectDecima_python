@@ -196,7 +196,9 @@ class Archive:
         file_entry = self.hash_to_entry.get(file_id, None)
         if file_entry:
             if is_core_file:
-                return CoreFile(self.get_file_data(file_entry), file_name)
+                core_file = CoreFile(self.get_file_data(file_entry), file_name)
+                core_file.parse()
+                return core_file
             else:
                 return self.get_file_data(file_entry)
 
