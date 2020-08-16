@@ -19,7 +19,7 @@ class CoreModel(CoreDummy):
         self.unk_entry_ref = EntryReference(core_file)
         self.floats = []
         self.vertex_data_info_ref = EntryReference(core_file)
-        self.guids_1 = []
+        self.mesh_info_ref = []
         self.materials = []
         self.mesh_stream = HashedString(0, '')
         self.self_guid = UUID(int=0)
@@ -38,7 +38,7 @@ class CoreModel(CoreDummy):
         for _ in range(unk_guid_count):
             ref = EntryReference(self._core_file)
             ref.parse(reader)
-            self.guids_1.append(ref)
+            self.mesh_info_ref.append(ref)
         unk_guid_count = reader.read_uint32()
         for _ in range(unk_guid_count):
             ref = EntryReference(self._core_file)
