@@ -2,6 +2,7 @@ from .dummy import CoreDummy
 from .model import CoreModel
 from .shader import CoreShader
 from .bone_data import CoreBoneData
+from .texture import Texture
 from .texture_set import TextureSet
 from .unk_model_entry import UnkModelEntry, UnkModelEntry2
 from .unk_entry import UnkEntry, MaterialReference
@@ -20,5 +21,6 @@ handlers = {
     0x8EB29E71F97E460F: UnkVertexInfo,
     0xFE2843D4AAD255E7: MaterialReference,
     0xA321E8C307328D2E: TextureSet,
+    0xA664164D69FD2B38: Texture,
 
 }

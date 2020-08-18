@@ -10,7 +10,7 @@ class HashedString:
 
 class UnHashedString:
 
-    def __init__(self, string):
+    def __init__(self, string=''):
         self.string = string
 
     def __str__(self):

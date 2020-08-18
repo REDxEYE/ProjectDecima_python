@@ -2,6 +2,7 @@ from pathlib import Path
 
 from ProjectDecima.archive.archive_array import ArchiveSet
 from ProjectDecima.core.entry_reference import EntryReference
+from ProjectDecima.core.stream_reference import StreamReference
 from ProjectDecima.core_file import CoreFile
 from ProjectDecima.archive.archive import Archive
 
@@ -13,6 +14,7 @@ def test_core_files():
         c = CoreFile(file)
         c.parse()
         EntryReference.resolve(c, None)
+
         print(c)
 
 
@@ -23,6 +25,7 @@ def test_archives():
     a = archive.queue_file("ds/models/characters/sam_sam/core/sam_body_naked/model/parts/mesh_bodynaked_lx.core")
     if a:
         a.parse()
+
     print(a)
     pass
 
@@ -34,10 +37,11 @@ def test_archive_set():
     a = arch_set.queue_file("ds/models/characters/sam_sam/core/sam_textures/textures/sam_body_naked_v01_set.core")
     if a:
         EntryReference.resolve(a, arch_set)
+        StreamReference.resolve(arch_set)
         print(a)
 
 
 if __name__ == '__main__':
-    test_core_files()
+    # test_core_files()
     # test_archives()
-    # test_archive_set()
+    test_archive_set()

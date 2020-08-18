@@ -28,6 +28,7 @@ class SrcEntry:
         self.src_name = HashedString()
         self.unk_0 = 0
         self.unks_1 = []
+        self.unk_pad = 0
         self.width = 0
         self.height = 0
         self.unks_2 = []
@@ -38,7 +39,7 @@ class SrcEntry:
         self.unk_0 = reader.read_uint16()
         self.unks_1 = reader.read_fmt('3I')
         if self.unk_0 == 0:
-            reader.skip(4)
+            self.unk_pad = reader.read_uint32()
         else:
             self.width, self.height = reader.read_fmt('2I')
         self.unks_2 = reader.read_fmt('4f')

@@ -37,8 +37,10 @@ class CoreFile:
             core_entry_class = self.get_handler(self.reader.peek_uint64())
             core_entry: CoreDummy = core_entry_class()
             start = self.reader.tell()
+            # try:
             core_entry.parse(self.reader)
-            # print(core_entry_class.__name__)
+            # except Exception as ex:
+            #     print(f"Failed to read Core entry at {start} in file {self.filepath}")
             self.reader.seek(start + core_entry.header.size + 12)
             self.entries.append(core_entry)
 

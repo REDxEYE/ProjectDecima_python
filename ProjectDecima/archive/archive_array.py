@@ -68,6 +68,7 @@ class ArchiveSet:
             self.archives.append(archive)
             self.hash_to_archive.update({k: archive for k in archive.hash_to_entry.keys()})
         self.cache_all()
+        self._cache = {}
 
     def queue_file(self, file_id: Union[str, int], is_core_file=True):
         if isinstance(file_id, str):

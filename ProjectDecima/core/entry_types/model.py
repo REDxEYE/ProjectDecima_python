@@ -1,8 +1,7 @@
 from typing import List
-from uuid import UUID
 
 from . import CoreDummy
-from ..pod.strings import HashedString
+from ...core.stream_reference import StreamReference
 from ..entry_reference import EntryReference
 from ...byte_io_ds import ByteIODS
 
@@ -21,9 +20,7 @@ class CoreModel(CoreDummy):
         self.vertex_data_info_ref = EntryReference()
         self.mesh_info_ref = []
         self.materials = []
-        self.mesh_stream = HashedString(0, '')
-        self.self_guid = UUID(int=0)
-        self.unks2 = []
+        self.mesh_stream = StreamReference()
 
     def parse(self, reader: ByteIODS):
         self.header.parse(reader)
@@ -45,6 +42,4 @@ class CoreModel(CoreDummy):
             ref.parse(reader)
             self.materials.append(ref)
         reader.skip(1)
-        self.mesh_stream = reader.read_unhashed_string()
-        self.self_guid = reader.read_guid()
-        self.unks2 = reader.read_fmt('3I')
+        self.mesh_stream.parse(reader)

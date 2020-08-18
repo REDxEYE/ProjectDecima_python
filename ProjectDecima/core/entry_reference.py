@@ -23,8 +23,8 @@ class EntryReference:
 
     @classmethod
     def resolve(cls, core_file, archive_array):
-        from ProjectDecima.core_file import CoreFile
-        from ProjectDecima.archive.archive_array import ArchiveSet
+        from ..core_file import CoreFile
+        from ..archive.archive_array import ArchiveSet
         core_file: CoreFile
         archive_array: ArchiveSet
 
