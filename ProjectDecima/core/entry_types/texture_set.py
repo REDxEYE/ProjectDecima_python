@@ -28,7 +28,7 @@ class SrcEntry:
         self.src_name = HashedString()
         self.unk_0 = 0
         self.unks_1 = []
-        self.unk_pad = 0
+        # self.unk_pad = 0
         self.width = 0
         self.height = 0
         self.unks_2 = []

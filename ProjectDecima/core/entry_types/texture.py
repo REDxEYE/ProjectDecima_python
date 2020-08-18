@@ -1,4 +1,5 @@
 from enum import IntEnum
+from pathlib import Path
 from uuid import UUID
 
 from . import CoreDummy
@@ -53,3 +54,28 @@ class Texture(CoreDummy):
         if self.stream_size > 0:
             self.stream.parse(reader)
         self.data_buffer = reader.read_bytes(self.buffer_size)
+
+    def export(self, base_dir: str):
+        base_dir = Path(base_dir)
+        try:
+            from PIL import Image
+        except ImportError:
+            return
+        pixel_type = {
+            TexturePixelFormat.RGBA8: ('RGBA', 'raw', 4),
+            TexturePixelFormat.A8: ('L', 'raw', 1),
+            TexturePixelFormat.BC1: ('RGBA', ('bcn', 1, 0), 0.5),
+            TexturePixelFormat.BC2: ('RGBA', ('bcn', 2, 0), 1),
+            TexturePixelFormat.BC3: ('RGBA', ('bcn', 3, 0), 1),
+            TexturePixelFormat.BC4: ('L', ('bcn', 4, 0), 0.5),
+            TexturePixelFormat.BC5: ('RGBA', ('bcn', 5, 0), 1),
+            TexturePixelFormat.BC7: ('RGBA', ('bcn', 7, 0), 1),
+        }
+        if self.stream:
+            if self.pixel_format in pixel_type:
+                pixel_info = pixel_type[self.pixel_format]
+                size = int(pixel_info[2] * self.width * self.height)
+                im = Image.frombuffer(pixel_info[0], (self.width, self.height),
+                                      self.stream.stream_reader.read_bytes(size),
+                                      *pixel_info[1])
+                im.save(base_dir / (self.stream.stream_path.string + '.tga'))

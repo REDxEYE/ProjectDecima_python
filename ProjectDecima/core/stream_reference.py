@@ -25,7 +25,7 @@ class StreamReference:
         self.unk_0 = 0
         self.offset = 0
         self.size = 0
-        self.stream_reader = ByteIODS()
+        self.stream_reader: ByteIODS = ByteIODS()
 
     def parse(self, reader: ByteIODS):
         self.stream_path = reader.read_unhashed_string()
@@ -33,5 +33,8 @@ class StreamReference:
         self.unk_0, self.offset, self.size = reader.read_fmt('3I')
         self.register_ref(self)
 
+    def __bool__(self):
+        return self.stream_reader.size() != 0
+
     def __repr__(self):
-        return f'<Steam "{self.stream_path}":{self.size}>'
+        return f'<Stream "{self.stream_path}":{self.size}>'
