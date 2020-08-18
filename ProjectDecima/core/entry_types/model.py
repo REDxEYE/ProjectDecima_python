@@ -9,16 +9,16 @@ from ...byte_io_ds import ByteIODS
 
 class CoreModel(CoreDummy):
 
-    def __init__(self, core_file):
-        super().__init__(core_file)
+    def __init__(self):
+        super().__init__()
 
         self.unk: List[int] = []
         self.unk1 = 0
-        self.armature_reference = EntryReference(core_file)
-        self.bone_data_ref = EntryReference(core_file)
-        self.unk_entry_ref = EntryReference(core_file)
+        self.armature_reference = EntryReference()
+        self.bone_data_ref = EntryReference()
+        self.unk_entry_ref = EntryReference()
         self.floats = []
-        self.vertex_data_info_ref = EntryReference(core_file)
+        self.vertex_data_info_ref = EntryReference()
         self.mesh_info_ref = []
         self.materials = []
         self.mesh_stream = HashedString(0, '')
@@ -36,12 +36,12 @@ class CoreModel(CoreDummy):
         self.vertex_data_info_ref.parse(reader)
         unk_guid_count = reader.read_uint32()
         for _ in range(unk_guid_count):
-            ref = EntryReference(self._core_file)
+            ref = EntryReference()
             ref.parse(reader)
             self.mesh_info_ref.append(ref)
         unk_guid_count = reader.read_uint32()
         for _ in range(unk_guid_count):
-            ref = EntryReference(self._core_file)
+            ref = EntryReference()
             ref.parse(reader)
             self.materials.append(ref)
         reader.skip(1)

@@ -3,9 +3,7 @@ from ProjectDecima.core.core import CoreHeader
 
 
 class CoreDummy:
-    def __init__(self, core_file):
-        from ...core_file import CoreFile
-        self._core_file: CoreFile = core_file
+    def __init__(self,):
         self.header = CoreHeader()
 
     def parse(self, reader: ByteIODS):

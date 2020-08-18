@@ -94,7 +94,7 @@ class ArchiveEntry:
         cls.encrypted = flag
 
     def __init__(self):
-        self.entry_num = 0
+        self.entry_id = 0
         self.key_0 = 0
         self.hash = 0
         self.offset = 0
@@ -105,7 +105,7 @@ class ArchiveEntry:
         if self.encrypted:
             self.decrypt(reader.read_fmt('8I'))
         else:
-            (self.entry_num, self.key_0, self.hash, self.offset, self.size, self.key_1) = reader.read_fmt('2I2Q2I')
+            (self.entry_id, self.key_0, self.hash, self.offset, self.size, self.key_1) = reader.read_fmt('2I2Q2I')
 
     def decrypt(self, data):
         input_key = [pack('4I', data[1], encryption_key_1[1], encryption_key_1[2], encryption_key_1[3]),
@@ -113,8 +113,7 @@ class ArchiveEntry:
         data = np.array(data, dtype=np.uint32)
         data = decrypt(input_key, data)
 
-        (self.entry_num, self.key_0, self.hash, self.offset, self.size, self.key_1) = unpack('2I2Q2I',
-                                                                                             pack('8I', *data))
+        (self.entry_id, self.key_0, self.hash, self.offset, self.size, self.key_1) = unpack('2I2Q2I', pack('8I', *data))
 
 
 class Archive:
@@ -125,6 +124,27 @@ class Archive:
         self.reader = ByteIODS(filepath)
         self.chunks: List[ArchiveChunk] = []
         self.hash_to_entry: Dict[int, ArchiveEntry] = {}
+
+    def to_cache(self):
+        cache = {'entries': {}, 'chunks': [], 'header': self.header.__dict__}
+        for key, entry in self.hash_to_entry.items():
+            cache['entries'][key] = dict(entry.__dict__)
+        for n, chunk in enumerate(self.chunks):
+            cache['chunks'].append(dict(chunk.__dict__))
+
+        return cache
+
+    def from_cache(self, cache):
+        self.header.__dict__.update(cache['header'])
+
+        for key, value in cache['entries'].items():
+            entry = ArchiveEntry()
+            entry.__dict__.update(value)
+            self.hash_to_entry[int(key)] = entry
+        for value in cache['chunks']:
+            chunk = ArchiveChunk()
+            chunk.__dict__.update(value)
+            self.chunks.append(chunk)
 
     @property
     def is_encrypted(self):

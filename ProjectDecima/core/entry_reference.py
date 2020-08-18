@@ -2,7 +2,6 @@ from typing import List
 from uuid import UUID
 from enum import IntEnum
 
-from .entry_types import CoreDummy
 from .pod.strings import HashedString
 from ..byte_io_ds import ByteIODS
 
@@ -36,9 +35,7 @@ class EntryReference:
             elif ref.load_method == LoadMethod.Embedded:
                 ref.ref = core_file.get_by_guid(ref.guid)
 
-    def __init__(self, core_file):
-        from ..core_file import CoreFile
-        self._core_file: CoreFile = core_file
+    def __init__(self):
         self.load_method = LoadMethod(0)
         self.guid = UUID(int=0)
         self.file_ref = HashedString(0, '')

@@ -8,8 +8,8 @@ from ..entry_reference import EntryReference
 
 class IndicesInfo(CoreDummy):
 
-    def __init__(self, core_file):
-        super().__init__(core_file)
+    def __init__(self):
+        super().__init__()
         self.indices_count = 0
         self.unks_0 = []
         self.guid = UUID(int=0)
@@ -23,12 +23,12 @@ class IndicesInfo(CoreDummy):
 
 class UnkVertexInfo(CoreDummy):
 
-    def __init__(self, core_file):
-        super().__init__(core_file)
+    def __init__(self):
+        super().__init__()
         self.unks_0 = []
         self.vertex_count = 0
         self.unk_1 = 0
-        self.guid = EntryReference(core_file)
+        self.guid = EntryReference()
         self.unks_2 = []
 
     def parse(self, reader: ByteIODS):
@@ -42,11 +42,11 @@ class UnkVertexInfo(CoreDummy):
 
 class MeshInfo(CoreDummy):
 
-    def __init__(self, core_file):
-        super().__init__(core_file)
+    def __init__(self):
+        super().__init__()
         self.unk_0 = 0
-        self.guid_0 = EntryReference(core_file)
-        self.guid_1 = EntryReference(core_file)
+        self.guid_0 = EntryReference()
+        self.guid_1 = EntryReference()
         self.index_count = 0
 
     def parse(self, reader: ByteIODS):
@@ -61,11 +61,11 @@ class MeshInfo(CoreDummy):
 
 class VertexInfo(CoreDummy):
 
-    def __init__(self, core_file):
-        super().__init__(core_file)
+    def __init__(self):
+        super().__init__()
         self.vertex_count = 0
         self.unks_0 = []
-        self.guid_0 = EntryReference(core_file)
+        self.guid_0 = EntryReference()
 
     def parse(self, reader: ByteIODS):
         self.header.parse(reader)

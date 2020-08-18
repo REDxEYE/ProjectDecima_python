@@ -8,8 +8,8 @@ from ..entry_reference import EntryReference
 
 class UnkModelEntry(CoreDummy):
 
-    def __init__(self, core_file):
-        super().__init__(core_file)
+    def __init__(self):
+        super().__init__()
         self.unk1 = 0
         self.model_refs: List[EntryReference] = []
 
@@ -20,7 +20,7 @@ class UnkModelEntry(CoreDummy):
         reader.skip(16)
         ref_count = reader.read_uint32()
         for _ in range(ref_count):
-            ref = EntryReference(self._core_file)
+            ref = EntryReference()
             ref.parse(reader)
             reader.skip(60)
             self.model_refs.append(ref)
@@ -35,7 +35,7 @@ class UnkModelEntry2(UnkModelEntry):
         reader.skip(20)
         ref_count = reader.read_uint32()
         for _ in range(ref_count):
-            ref = EntryReference(self._core_file)
+            ref = EntryReference()
             ref.parse(reader)
             reader.skip(4)
             self.model_refs.append(ref)

@@ -35,7 +35,7 @@ class CoreFile:
     def parse(self):
         while self.reader:
             core_entry_class = self.get_handler(self.reader.peek_uint64())
-            core_entry: CoreDummy = core_entry_class(self)
+            core_entry: CoreDummy = core_entry_class()
             start = self.reader.tell()
             core_entry.parse(self.reader)
             # print(core_entry_class.__name__)

@@ -1,6 +1,6 @@
 class HashedString:
 
-    def __init__(self, hash, string):
+    def __init__(self, hash=0, string=''):
         self.hash = hash
         self.string = string
 

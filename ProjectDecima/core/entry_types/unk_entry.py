@@ -5,8 +5,8 @@ from ..entry_reference import EntryReference
 
 class UnkEntry(CoreDummy):
 
-    def __init__(self, core_file):
-        super().__init__(core_file)
+    def __init__(self):
+        super().__init__()
         self.unk_0_count = 0
         self.unk_0_floats = []
         self.unk_1_count = 0
@@ -22,9 +22,9 @@ class UnkEntry(CoreDummy):
 
 class MaterialReference(CoreDummy):
 
-    def __init__(self, core_file):
-        super().__init__(core_file)
-        self.guid_0 = EntryReference(core_file)
+    def __init__(self,):
+        super().__init__()
+        self.guid_0 = EntryReference()
         self.unk_0 = 0
 
     def parse(self, reader: ByteIODS):
