@@ -30,7 +30,8 @@ class EntryReference:
 
         for ref in cls._all_refs:
             if ref.load_method in [LoadMethod.ImmediateCoreFile, LoadMethod.CoreFile]:
-                ref.ref = archive_array.queue_file(ref.file_ref.string, True)
+                core = archive_array.queue_file(ref.file_ref.string, True)
+                ref.ref = core.get_by_guid(ref.guid)
                 pass
             elif ref.load_method == LoadMethod.Embedded:
                 ref.ref = core_file.get_by_guid(ref.guid)

@@ -6,8 +6,8 @@ from ...byte_io_ds import ByteIODS
 
 class CoreBoneData(CoreDummy):
 
-    def __init__(self, core_file):
-        super().__init__(core_file)
+    def __init__(self):
+        super().__init__()
         self.bone_ids = []
         self.bone_matrices = []
         self.guid_0 = UUID(int=0)

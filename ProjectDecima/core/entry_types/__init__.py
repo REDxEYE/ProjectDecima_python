@@ -7,6 +7,7 @@ from .texture_set import TextureSet
 from .unk_model_entry import UnkModelEntry, UnkModelEntry2
 from .unk_entry import UnkEntry, MaterialReference
 from .mesh_info import IndicesInfo, UnkVertexInfo, MeshInfo, VertexInfo
+from .armature import Armature
 
 handlers = {
     0xE2A812418ABC2172: CoreModel,
@@ -22,5 +23,6 @@ handlers = {
     0xFE2843D4AAD255E7: MaterialReference,
     0xA321E8C307328D2E: TextureSet,
     0xA664164D69FD2B38: Texture,
+    0x11E1D1A40B933E66: Armature,
 
 }

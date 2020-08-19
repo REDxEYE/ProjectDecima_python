@@ -9,6 +9,7 @@ from ...byte_io_ds import ByteIODS
 
 class TexturePixelFormat(IntEnum):
     UNK = 0
+    UNK_FORMAT = 0x13
     RGBA8 = 0xC
     A8 = 0x1F
     BC1 = 0x42
@@ -53,7 +54,7 @@ class Texture(CoreDummy):
          self.stream_mips, self.unk_3, self.unk_4) = reader.read_fmt('6I')
         if self.stream_size > 0:
             self.stream.parse(reader)
-        self.data_buffer = reader.read_bytes(self.buffer_size)
+        self.data_buffer = reader.read_bytes(self.total_size)
 
     def export(self, base_dir: str):
         base_dir = Path(base_dir)
