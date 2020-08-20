@@ -3,7 +3,7 @@ from uuid import UUID
 from enum import IntEnum
 
 from .pod.strings import HashedString
-from ..byte_io_ds import ByteIODS
+from ..utils.byte_io_ds import ByteIODS
 
 
 class LoadMethod(IntEnum):
@@ -23,7 +23,7 @@ class EntryReference:
 
     @classmethod
     def resolve(cls, core_file, archive_array):
-        from ..core_file import CoreFile
+        from .core_file import CoreFile
         from ..archive.archive_array import ArchiveSet
         core_file: CoreFile
         archive_array: ArchiveSet

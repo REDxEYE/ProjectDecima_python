@@ -1,5 +1,5 @@
-from ...byte_io_ds import ByteIODS
-from ProjectDecima.core.core import CoreHeader
+from ...utils.byte_io_ds import ByteIODS
+from ...core.pod.core_header import CoreHeader
 
 
 class CoreDummy:

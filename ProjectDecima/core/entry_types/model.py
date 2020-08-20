@@ -3,7 +3,7 @@ from typing import List
 from . import CoreDummy
 from ...core.stream_reference import StreamReference
 from ..entry_reference import EntryReference
-from ...byte_io_ds import ByteIODS
+from ...utils.byte_io_ds import ByteIODS
 
 
 class CoreModel(CoreDummy):

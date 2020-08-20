@@ -1,4 +1,4 @@
-from ProjectDecima.byte_io_ds import ByteIODS
+from ...utils.byte_io_ds import ByteIODS
 from uuid import UUID
 
 

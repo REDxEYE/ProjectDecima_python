@@ -4,7 +4,7 @@ from pathlib import Path
 from PIL import Image
 from prettytable import PrettyTable
 
-from ProjectDecima.byte_io import ByteIO
+from ProjectDecima.utils.byte_io import ByteIO
 
 pixel_type = {
     0x1F: ("RGBA", ('bcn', 1, 0)),

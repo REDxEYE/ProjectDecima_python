@@ -1,5 +1,5 @@
 from . import CoreDummy
-from ...byte_io_ds import ByteIODS
+from ...utils.byte_io_ds import ByteIODS
 from ..entry_reference import EntryReference
 
 

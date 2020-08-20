@@ -5,9 +5,9 @@ from typing import List, Dict, Union
 
 import numpy as np
 
-from ..byte_io_ds import ByteIODS
+from ..utils.byte_io_ds import ByteIODS
 from ..constants import encryption_key_1
-from ..core_file import CoreFile
+from ..core.core_file import CoreFile
 from ..utils.chunk_utils import calculate_first_containing_chunk, calculate_last_containing_chunk
 from ..utils.decryption import decrypt, hash_string, decrypt_chunk_data
 from ..utils.oodle_wrapper import Oodle

@@ -1,8 +1,6 @@
 import json
 from pathlib import Path
 from typing import List, Union, Dict
-from zlib import crc32
-import mmap
 
 from .archive import Archive
 from ..utils.decryption import hash_string

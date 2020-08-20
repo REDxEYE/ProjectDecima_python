@@ -2,9 +2,9 @@ from pathlib import Path
 from typing import List, Union
 from uuid import UUID
 
-from .byte_io_ds import ByteIODS
+from ..utils.byte_io_ds import ByteIODS
 
-from .core.entry_types import *
+from .entry_types import *
 
 known_magics = {
     0x11e1d1a40b933e66: "Armature",

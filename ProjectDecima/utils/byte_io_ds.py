@@ -1,6 +1,6 @@
 from .byte_io import ByteIO
 from uuid import UUID
-from .core.pod.strings import HashedString, UnHashedString
+from ..core.pod.strings import HashedString, UnHashedString
 
 
 class ByteIODS(ByteIO):

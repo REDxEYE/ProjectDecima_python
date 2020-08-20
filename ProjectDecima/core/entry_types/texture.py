@@ -4,7 +4,7 @@ from uuid import UUID
 
 from . import CoreDummy
 from ...core.stream_reference import StreamReference
-from ...byte_io_ds import ByteIODS
+from ...utils.byte_io_ds import ByteIODS
 
 
 class TexturePixelFormat(IntEnum):

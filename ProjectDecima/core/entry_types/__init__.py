@@ -2,6 +2,7 @@ from .dummy import CoreDummy
 from .model import CoreModel
 from .shader import CoreShader
 from .bone_data import CoreBoneData
+from .sound_bank import SoundDesc, WWiseSound, SoundUnk
 from .texture import Texture
 from .texture_set import TextureSet
 from .unk_model_entry import UnkModelEntry, UnkModelEntry2
@@ -24,5 +25,8 @@ handlers = {
     0xA321E8C307328D2E: TextureSet,
     0xA664164D69FD2B38: Texture,
     0x11E1D1A40B933E66: Armature,
+    0xEB0930FE3433F89F: SoundDesc,
+    0x150c273beb8f2d0c: WWiseSound,
+    0xf3586131b4f18516: SoundUnk,
 
 }

@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from ..byte_io_ds import ByteIODS
+from ..utils.byte_io_ds import ByteIODS
 from .pod.strings import UnHashedString
 
 
@@ -14,7 +14,7 @@ class StreamReference:
 
     @classmethod
     def resolve(cls, archive_array):
-        from ProjectDecima.archive.archive_array import ArchiveSet
+        from ..archive.archive_array import ArchiveSet
         archive_array: ArchiveSet
         for ref in cls._all_refs:
             ref.stream_reader = ByteIODS(archive_array.queue_file(ref.stream_path.string, False))
