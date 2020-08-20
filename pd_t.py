@@ -43,31 +43,39 @@ def test_archive_set():
     work_dir = r"F:\SteamLibrary\steamapps\common\Death Stranding\data"
     arch_set = ArchiveSet(work_dir)
     arch_set.parse_all()
-    # a = arch_set.queue_file("ds/sounds/wwise_bnk_collections/sd_wwise_bnk_collection_game_resident.core")
-    # EntryReference.resolve(a, arch_set)
-    # StreamReference.resolve(arch_set)
-    # pass
-    folder = r'F:\SteamLibrary\steamapps\common\Death Stranding\dump\ds\sounds\wwise_bnk_collections'
-    for file in Path(folder).rglob('*.core'):
-        c = CoreFile(file)
-        c.parse()
-        EntryReference.resolve(c, arch_set)
+
+    file = Path(
+        r"F:\SteamLibrary\steamapps\common\Death Stranding\dump\levels\worlds\_l600_beach01\tiles\tile_x-02_y01\tileresource.core")
+
+    if file.is_dir():
+        for file in Path(file).rglob('*.core'):
+            core_file = CoreFile(file)
+            core_file.parse()
+            EntryReference.resolve(core_file, arch_set)
+            StreamReference.resolve(arch_set)
+            for ent in core_file.entries:
+                if ent.header.magic == 0xA664164D69FD2B38:
+                    ent.export(r"F:\SteamLibrary\steamapps\common\Death Stranding\dump")
+                elif ent.header.magic == 0x150c273beb8f2d0c:
+                    os.makedirs(
+                        Path(r"F:\SteamLibrary\steamapps\common\Death Stranding\dump") / core_file.filepath.with_suffix(
+                            '') / str(
+                            ent.header.guid.__str__()), exist_ok=True)
+                    ent.export(
+                        Path(r"F:\SteamLibrary\steamapps\common\Death Stranding\dump") / core_file.filepath.with_suffix(
+                            '') / str(
+                            ent.header.guid.__str__()))
+            pass
+    else:
+        core_file = CoreFile(file)
+        core_file.parse()
+        EntryReference.resolve(core_file, arch_set)
         StreamReference.resolve(arch_set)
-        for ent in c.entries:
-            if ent.header.magic == 0xA664164D69FD2B38:
-                ent.export(r"F:\SteamLibrary\steamapps\common\Death Stranding\dump")
-            elif ent.header.magic == 0x150c273beb8f2d0c:
-                os.makedirs(
-                    Path(r"F:\SteamLibrary\steamapps\common\Death Stranding\dump") / c.filepath.with_suffix('') / str(
-                        ent.header.guid.__str__()), exist_ok=True)
-                ent.export(
-                    Path(r"F:\SteamLibrary\steamapps\common\Death Stranding\dump") / c.filepath.with_suffix('') / str(
-                        ent.header.guid.__str__()))
         pass
 
 
 if __name__ == '__main__':
-    test_core_file()
+    # test_core_file()
     # test_core_files()
     # test_archives()
-    # test_archive_set()
+    test_archive_set()

@@ -29,10 +29,12 @@ class EntryReference:
         archive_array: ArchiveSet
 
         for ref in cls._all_refs:
+            if ref.guid.int == 0:
+                continue
             if ref.load_method in [LoadMethod.ImmediateCoreFile, LoadMethod.CoreFile]:
                 core = archive_array.queue_file(ref.file_ref.string, True)
                 ref.ref = core.get_by_guid(ref.guid)
-                pass
+                ref.core_file = core
             elif ref.load_method == LoadMethod.Embedded:
                 ref.ref = core_file.get_by_guid(ref.guid)
 
@@ -41,6 +43,7 @@ class EntryReference:
         self.guid = UUID(int=0)
         self.file_ref = HashedString(0, '')
         self.ref = None
+        self.core_file = None
 
     def __repr__(self):
         return f"<Ref {self.guid} {self.load_method.name}>"

@@ -9,14 +9,19 @@ from ...utils.byte_io_ds import ByteIODS
 
 class TexturePixelFormat(IntEnum):
     UNK = 0
-    UNK_FORMAT = 0x13
     RGBA8 = 0xC
+    UNK_FORMAT_0 = 0x12
+    UNK_FORMAT_1 = 0x13
+    UNK_FORMAT_2 = 0x16
+    UNK_FORMAT_3 = 0x1C
     A8 = 0x1F
+    UNK_FORMAT_4 = 0x31
     BC1 = 0x42
     BC2 = 0x43
     BC3 = 0x44
     BC4 = 0x45
     BC5 = 0x47
+    CUBEMAP = 0x49
     BC7 = 0x4B
 
 

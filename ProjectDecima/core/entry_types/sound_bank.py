@@ -21,10 +21,11 @@ class SoundDesc(CoreDummy):
             ref.parse(reader)
             self.sound_refs.append(ref)
 
+
 class SoundUnk(CoreDummy):
     def __init__(self):
         super().__init__()
-        self.refs:List[EntryReference] = []
+        self.refs: List[EntryReference] = []
 
     def parse(self, reader: ByteIODS):
         self.header.parse(reader)
@@ -69,7 +70,7 @@ class WWiseSound(CoreDummy):
                 pass
             else:
                 sub_reader.skip(size + 8)
-        data: DATA = self.sections.get('DATA',None)
+        data: DATA = self.sections.get('DATA', None)
         if data:
             didx: DIDX = self.sections['DIDX']
             for entry in didx.wem_descs:
@@ -91,5 +92,5 @@ class WWiseSound(CoreDummy):
     def export(self, base_dir: str):
         base_dir = Path(base_dir)
         for n, file in enumerate(self.wave_files):
-            with (base_dir/ f'file_{n}.wem').open('wb') as f:
+            with (base_dir / f'file_{n}.wem').open('wb') as f:
                 f.write(file)

@@ -1,14 +1,16 @@
 from .dummy import CoreDummy
+from .texture import Texture
 from .model import CoreModel
 from .shader import CoreShader
-from .bone_data import CoreBoneData
-from .sound_bank import SoundDesc, WWiseSound, SoundUnk
-from .texture import Texture
-from .texture_set import TextureSet
-from .unk_model_entry import UnkModelEntry, UnkModelEntry2
-from .unk_entry import UnkEntry, MaterialReference
-from .mesh_info import IndicesInfo, UnkVertexInfo, MeshInfo, VertexInfo
 from .armature import Armature
+from .bone_data import CoreBoneData
+from .texture_set import TextureSet
+from .unk_entry import UnkEntry, MaterialReference
+from .sound_bank import SoundDesc, WWiseSound, SoundUnk
+from .unk_model_entry import UnkModelEntry, UnkModelEntry2
+from .level.level_tile_collection import LevelTileCollection
+from .level.level_lod_info import LevelTileLodInfo, LevelTileLod
+from .mesh_info import IndicesInfo, UnkVertexInfo, MeshInfo, VertexInfo
 
 handlers = {
     0xE2A812418ABC2172: CoreModel,
@@ -28,5 +30,8 @@ handlers = {
     0xEB0930FE3433F89F: SoundDesc,
     0x150c273beb8f2d0c: WWiseSound,
     0xf3586131b4f18516: SoundUnk,
+    0x3c0d150db02d8c80: LevelTileCollection,
+    0x8C348AF2D505E5BC: LevelTileLodInfo,
+    0x25591EC41134AEA2: LevelTileLod,
 
 }
