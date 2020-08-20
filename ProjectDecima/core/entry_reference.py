@@ -37,6 +37,8 @@ class EntryReference:
                 ref.core_file = core
             elif ref.load_method == LoadMethod.Embedded:
                 ref.ref = core_file.get_by_guid(ref.guid)
+                if ref.ref is None:
+                    print("Failed to resolve GUID ref")
 
     def __init__(self):
         self.load_method = LoadMethod(0)
