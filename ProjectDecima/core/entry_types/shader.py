@@ -4,5 +4,5 @@ from ...utils.byte_io_ds import ByteIODS
 
 class CoreShader(CoreDummy):
 
-    def parse(self, reader: ByteIODS):
-        super().parse(reader)
+    def parse(self, reader: ByteIODS, core_file):
+        super().parse(reader, None)

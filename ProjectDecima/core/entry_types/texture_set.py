@@ -16,9 +16,9 @@ class TSEntry:
         self.unk_4 = 0
         self.ref = EntryReference()
 
-    def parse(self, reader: ByteIODS):
+    def parse(self, reader: ByteIODS, core_file):
         self.unk_0, self.unk_1, self.unk_2, self.unk_3, self.unk_4 = reader.read_fmt('4IB')
-        self.ref.parse(reader)
+        self.ref.parse(reader, core_file)
 
 
 class SrcEntry:
@@ -51,12 +51,13 @@ class TextureSet(CoreDummy):
         self.unk_0 = 0
         self.src_entries: List[SrcEntry] = []
 
-    def parse(self, reader: ByteIODS):
+    def parse(self, reader: ByteIODS, core_file):
         self.header.parse(reader)
+        self.guid = reader.read_guid()
         entry_count = reader.read_uint32()
         for _ in range(entry_count):
             entry = TSEntry()
-            entry.parse(reader)
+            entry.parse(reader, core_file)
             self.ts_entries.append(entry)
         self.unk_0 = reader.read_uint32()
         src_entry_count = reader.read_uint32()

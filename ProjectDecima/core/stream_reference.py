@@ -17,6 +17,7 @@ class StreamReference:
         from ..archive.archive_array import ArchiveSet
         archive_array: ArchiveSet
         for ref in cls._all_refs:
+            print(f'Loading referenced stream: {ref.stream_path.string}')
             ref.stream_reader = ByteIODS(archive_array.queue_file(ref.stream_path.string, False))
 
     def __init__(self):

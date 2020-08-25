@@ -12,7 +12,6 @@ def test_core_file():
     file = r"F:\SteamLibrary\steamapps\common\Death Stranding\dump\ds\sounds\wwise_cinematics_sound_resource\cs00\sq_cs00_s00100\sq_cs00_s00100_sound.core"
     c = CoreFile(file)
     c.parse()
-    EntryReference.resolve(c, None)
     print(c)
 
 
@@ -22,7 +21,6 @@ def test_core_files():
     for file in Path(folder).rglob('*.core'):
         c = CoreFile(file)
         c.parse()
-        EntryReference.resolve(c, None)
 
         print(c)
 
@@ -45,13 +43,14 @@ def test_archive_set():
     arch_set.parse_all()
 
     file = Path(
-        r"F:\SteamLibrary\steamapps\common\Death Stranding\dump\levels\worlds\_l600_beach01\tiles\tile_x-02_y01\tileresource.core")
+        # r"F:\SteamLibrary\steamapps\common\Death Stranding\dump\ds\entities\player\variant\ds_player_variant_sam_body_suit.core")
+        r"F:\SteamLibrary\steamapps\common\Death Stranding\dump\ds\models\characters\sam_sa~~m\core\sam_body_naked\model\parts\mesh_bodynaked_lx.core")
 
     if file.is_dir():
         for file in Path(file).rglob('*.core'):
             core_file = CoreFile(file)
             core_file.parse()
-            EntryReference.resolve(core_file, arch_set)
+            EntryReference.resolve(arch_set)
             StreamReference.resolve(arch_set)
             for ent in core_file.entries:
                 if ent.header.magic == 0xA664164D69FD2B38:
@@ -69,7 +68,9 @@ def test_archive_set():
     else:
         core_file = CoreFile(file)
         core_file.parse()
-        EntryReference.resolve(core_file, arch_set)
+        EntryReference.resolve(arch_set)
+        while EntryReference.dirty:
+            EntryReference.resolve(arch_set)
         StreamReference.resolve(arch_set)
         pass
 

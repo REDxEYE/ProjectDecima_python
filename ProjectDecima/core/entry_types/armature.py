@@ -1,6 +1,7 @@
 from typing import List
 
 from . import CoreDummy
+from ..entry_reference import EntryReference
 from ..pod.strings import HashedString
 from ...utils.byte_io_ds import ByteIODS
 
@@ -49,8 +50,9 @@ class Armature(CoreDummy):
         self.unks_1 = []
         self.unks_2 = []
 
-    def parse(self, reader: ByteIODS):
+    def parse(self, reader: ByteIODS, core_file):
         self.header.parse(reader)
+        self.guid = reader.read_guid()
         bone_count = reader.read_uint32()
         for _ in range(bone_count):
             bone = Bone()
@@ -66,6 +68,21 @@ class Armature(CoreDummy):
             unk = UnkData1()
             unk.parse(reader)
             self.unk_data_1.append(unk)
-        self.unks_2 = reader.read_fmt('20I')
+        if reader.peek_uint64()==0:
+            self.unks_2 = reader.read_fmt('20I')
         unks_2_count = reader.read_uint32()
         self.unks_2 = reader.read_fmt(f'{unks_2_count}H')
+
+
+class ArmatureReference(CoreDummy):
+
+    def __init__(self):
+        super().__init__()
+        self.unk_entry_ref = EntryReference()
+        self.armature_ref = EntryReference()
+
+    def parse(self, reader: ByteIODS, core_file):
+        self.header.parse(reader)
+        self.guid = reader.read_guid()
+        self.unk_entry_ref.parse(reader, core_file)
+        self.armature_ref.parse(reader, core_file)

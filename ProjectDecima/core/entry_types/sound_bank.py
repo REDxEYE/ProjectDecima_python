@@ -13,27 +13,14 @@ class SoundDesc(CoreDummy):
         super().__init__()
         self.sound_refs: List[EntryReference] = []
 
-    def parse(self, reader: ByteIODS):
+    def parse(self, reader: ByteIODS, core_file):
         self.header.parse(reader)
+        self.guid = reader.read_guid()
         ref_count = reader.read_uint32()
         for _ in range(ref_count):
             ref = EntryReference()
-            ref.parse(reader)
+            ref.parse(reader, core_file)
             self.sound_refs.append(ref)
-
-
-class SoundUnk(CoreDummy):
-    def __init__(self):
-        super().__init__()
-        self.refs: List[EntryReference] = []
-
-    def parse(self, reader: ByteIODS):
-        self.header.parse(reader)
-        ref_count = reader.read_uint32()
-        for _ in range(ref_count):
-            ref = EntryReference()
-            ref.parse(reader)
-            self.refs.append(ref)
 
 
 class WWiseSound(CoreDummy):
@@ -55,9 +42,9 @@ class WWiseSound(CoreDummy):
     def _get_section_handler(self, magic) -> Type[WWiseSection]:
         return self._sections_handlers.get(magic, GenericBlock)
 
-    def parse(self, reader: ByteIODS):
+    def parse(self, reader: ByteIODS, core_file):
         self.header.parse(reader)
-        start = reader.tell()
+        self.guid = reader.read_guid()
         self.unk_0, self.wwise_size, self.unk_1 = reader.read_fmt('3I')
         sub_reader = ByteIODS(reader.read_bytes(self.wwise_size))
         while sub_reader:

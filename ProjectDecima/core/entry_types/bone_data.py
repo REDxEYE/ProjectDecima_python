@@ -12,8 +12,9 @@ class CoreBoneData(CoreDummy):
         self.bone_matrices = []
         self.guid_0 = UUID(int=0)
 
-    def parse(self, reader: ByteIODS):
-        self.header.parse(reader)
+    def parse(self, reader: ByteIODS, core_file):
+        self.header.parse(reader,)
+        self.guid = reader.read_guid()
         bone_count = reader.read_uint32()
         self.bone_ids = reader.read_fmt(f'{bone_count}H')
         matrix_count = reader.read_uint32()

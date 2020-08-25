@@ -21,7 +21,7 @@ class TexturePixelFormat(IntEnum):
     BC3 = 0x44
     BC4 = 0x45
     BC5 = 0x47
-    CUBEMAP = 0x49
+    BC6 = 0x49
     BC7 = 0x4B
 
 
@@ -47,8 +47,9 @@ class Texture(CoreDummy):
         self.stream = StreamReference()
         self.data_buffer = b''
 
-    def parse(self, reader: ByteIODS):
+    def parse(self, reader: ByteIODS, core_file):
         self.header.parse(reader)
+        self.guid = reader.read_guid()
         self.unk_0, self.width, self.height, self.layer_count = reader.read_fmt('4H')
         self.total_mips = reader.read_uint8()
         self.pixel_format = TexturePixelFormat(reader.read_uint8())

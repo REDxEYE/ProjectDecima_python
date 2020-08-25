@@ -5,6 +5,8 @@ from typing import List, Dict, Union
 
 import numpy as np
 
+from ..core.entry_reference import EntryReference
+from ..core.stream_reference import StreamReference
 from ..utils.byte_io_ds import ByteIODS
 from ..constants import encryption_key_1
 from ..core.core_file import CoreFile
@@ -191,7 +193,6 @@ class Archive:
         first_chunk, last_chunk = self.get_chunk_boundaries(entry.hash)
         total_data = bytearray()
         output_size = 0
-        input_size = 0
         for i in range(first_chunk, last_chunk + 1):
             chunk = self.chunks[i]
             self.reader.seek(chunk.compressed_offset)
@@ -201,7 +202,6 @@ class Archive:
                 chunk_data = decrypt_chunk_data(chunk_data, key)
             total_data.extend(chunk_data)
             output_size += chunk.uncompressed_size
-            input_size += chunk.compressed_size
         file_position = entry.offset % self.header.max_chunk_size
         decompressed_data = Oodle.decompress(total_data, output_size)
 

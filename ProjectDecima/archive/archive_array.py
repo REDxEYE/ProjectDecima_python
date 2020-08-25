@@ -1,12 +1,15 @@
 import json
 from pathlib import Path
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Set
 
 from .archive import Archive
+from ..core.entry_reference import EntryReference
+from ..core.stream_reference import StreamReference
 from ..utils.decryption import hash_string
 
 
 class ArchiveSet:
+    __core_file_cache: Dict[int, 'CoreFile'] = {}
 
     def __init__(self, work_dir):
         self.work_dir = Path(work_dir)
@@ -72,6 +75,13 @@ class ArchiveSet:
         if isinstance(file_id, str):
             if file_id.rfind('.') == -1:
                 file_id += '.core' if is_core_file else '.core.stream'
+        core_file = self.__core_file_cache.get(file_id, None)
+        if core_file:
+            return core_file
         archive = self.hash_to_archive.get(hash_string(file_id), None)
         if archive:
-            return archive.queue_file(file_id, is_core_file)
+            core_file = archive.queue_file(file_id, is_core_file)
+            if is_core_file:
+                StreamReference.resolve(self)
+            self.__core_file_cache[file_id] = core_file
+            return core_file

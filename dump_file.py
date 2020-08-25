@@ -7,10 +7,10 @@ from ProjectDecima import ArchiveSet
 def main():
     archive_dir = Path(input('Folder with archives: ') or r'F:\SteamLibrary\steamapps\common\Death Stranding\data')
     print(f'Loading archives from "{archive_dir}"')
-    ar_set = ArchiveSet(archive_dir)
-    ar_set.parse_all()
     dump_dir = Path(input('Output path: ') or r'F:\SteamLibrary\steamapps\common\Death Stranding\dump')
     print(f'Dumping files to "{archive_dir}"')
+    ar_set = ArchiveSet(archive_dir)
+    ar_set.parse_all()
     while 1:
         core_file_path = input('Core file path: ')
         if not core_file_path:

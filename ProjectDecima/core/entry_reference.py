@@ -3,6 +3,7 @@ from uuid import UUID
 from enum import IntEnum
 
 from .pod.strings import HashedString
+from .stream_reference import StreamReference
 from ..utils.byte_io_ds import ByteIODS
 
 
@@ -15,59 +16,56 @@ class LoadMethod(IntEnum):
 
 
 class EntryReference:
-    _all_refs: List['EntryReference'] = []
+    _global_refs: List['EntryReference'] = []
+    dirty = False
 
     @classmethod
-    def register_ref(cls, self):
-        cls._all_refs.append(self)
+    def register_global_ref(cls, self):
+        cls._global_refs.append(self)
+        cls.dirty = True
 
     @classmethod
-    def resolve(cls, core_file, archive_array):
+    def resolve(cls, archive_array):
         from .core_file import CoreFile
         from ..archive.archive_array import ArchiveSet
         core_file: CoreFile
         archive_array: ArchiveSet
+        cls.dirty = False
 
-        for ref in cls._all_refs:
+        for ref in cls._global_refs.copy():
             if ref.guid.int == 0:
+                cls._global_refs.remove(ref)
                 continue
             if ref.load_method in [LoadMethod.ImmediateCoreFile, LoadMethod.CoreFile]:
-                core = archive_array.queue_file(ref.file_ref.string, True)
+                print(f'Loading referenced core file: {ref._file_ref.string}')
+                core = archive_array.queue_file(ref._file_ref.string, True)
                 ref.ref = core.get_by_guid(ref.guid)
-                ref.core_file = core
-            elif ref.load_method == LoadMethod.Embedded:
-                ref.ref = core_file.get_by_guid(ref.guid)
-                if ref.ref is None:
-                    print("Failed to resolve GUID ref")
+                ref._core_file = core
+            if ref.ref:
+                cls._global_refs.remove(ref)
+        pass
 
     def __init__(self):
         self.load_method = LoadMethod(0)
         self.guid = UUID(int=0)
-        self.file_ref = HashedString(0, '')
+        self._file_ref = HashedString(0, '')
         self.ref = None
-        self.core_file = None
+        self._core_file = None
 
     def __repr__(self):
-        return f"<Ref {self.guid} {self.load_method.name}>"
+        if self.ref is None:
+            return f"<Ref {self.guid} {self.load_method.name}>"
+        else:
+            return f"<Ref {self.ref.__class__.__name__} {self.load_method.name}>"
 
-    def parse(self, reader: ByteIODS):
+    def parse(self, reader: ByteIODS, core_file):
         self.load_method = LoadMethod(reader.read_uint8())
         if self.load_method != LoadMethod.NotPresent:
-            self.set_guid(reader.read_guid())
+            self.guid = reader.read_guid()
         if self.load_method >= LoadMethod.ImmediateCoreFile:
-            self.file_ref = reader.read_hashed_string()
-        self.register_ref(self)
+            self._file_ref = reader.read_hashed_string()
 
-    def set_guid(self, guid):
-        if isinstance(guid, UUID):
-            self.guid = guid
-        elif isinstance(guid, bytes):
-            self.guid = UUID(bytes=guid)
-
-    # def resolve(self) -> CoreDummy:
-    #     if self.load_method == LoadMethod.Embedded:
-    #         return self._core_file.get_by_guid(self.guid)
-    #
-    # @property
-    # def ref(self):
-    #     return self.resolve()
+        if self.load_method == LoadMethod.Embedded:
+            core_file.local_links.append(self)
+        elif self.load_method in [LoadMethod.ImmediateCoreFile, LoadMethod.CoreFile]:
+            self.register_global_ref(self)
