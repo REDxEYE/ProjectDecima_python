@@ -1,4 +1,4 @@
-from enum import IntEnum, auto
+from enum import IntEnum, auto, IntFlag
 from typing import List
 
 from ..byte_io import ByteIO
@@ -278,8 +278,83 @@ class RDEF(DXChunk):
             self.constant_buffers.append(buffer)
 
 
+class D3DRegisterComponentType(IntEnum):
+    UNKNOWN = 0
+    UINT32 = auto()
+    SINT32 = auto()
+    FLOAT32 = auto()
+
+
+class D3DName(IntEnum):
+    UNDEFINED = 0
+    POSITION = auto()
+    CLIP_DISTANCE = auto()
+    CULL_DISTANCE = auto()
+    RENDER_TARGET_ARRAY_INDEX = auto()
+    VIEWPORT_ARRAY_INDEX = auto()
+    VERTEX_ID = auto()
+    PRIMITIVE_ID = auto()
+    INSTANCE_ID = auto()
+    IS_FRONT_FACE = auto()
+    SAMPLE_INDEX = auto()
+    FINAL_QUAD_EDGE_TESSFACTOR = auto()
+    FINAL_QUAD_INSIDE_TESSFACTOR = auto()
+    FINAL_TRI_EDGE_TESSFACTOR = auto()
+    FINAL_TRI_INSIDE_TESSFACTOR = auto()
+    FINAL_LINE_DETAIL_TESSFACTOR = auto()
+    FINAL_LINE_DENSITY_TESSFACTOR = auto()
+    BARYCENTRICS = auto()
+    SHADINGRATE = auto()
+    CULLPRIMITIVE = auto()
+    TARGET = auto()
+    DEPTH = auto()
+    COVERAGE = auto()
+    DEPTH_GREATER_EQUAL = auto()
+    DEPTH_LESS_EQUAL = auto()
+    STENCIL_REF = auto()
+    INNER_COVERAGE = auto()
+
+
+class D3DComponentMask(IntFlag):
+    X = 1
+    Y = 2
+    Z = 4
+    W = 8
+
+
+class ISGNElement:
+    def __init__(self, reader: ByteIO):
+        name_offset = reader.read_int32()
+
+        with reader.save_current_pos():
+            reader.seek(name_offset)
+            self.name = reader.read_ascii_string()
+
+        self.semantic_index = reader.read_int32()
+        self.system_value_type = D3DName(reader.read_int32())
+        self.component_type = D3DRegisterComponentType(reader.read_int32())
+        self.register_index = reader.read_int32()
+        self.mask = D3DComponentMask(reader.read_int8())
+        self.rw_mask = reader.read_int8()
+        reader.skip(2)
+
+
+class ISGN(DXChunk):
+    def __init__(self):
+        super().__init__()
+        self.elements: List[ISGNElement] = []
+
+    def parse(self, reader: ByteIO):
+        super().parse(reader)
+
+        count = reader.read_int32()
+        reader.skip(4)
+        self.elements = [ISGNElement(reader) for _ in range(count)]
+
+
 _chunks = {
     'RDEF': RDEF,
+    'ISGN': ISGN
 }
 
 
