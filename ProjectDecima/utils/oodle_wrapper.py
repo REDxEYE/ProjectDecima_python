@@ -23,12 +23,8 @@ class Oodle:
 
     @staticmethod
     def decompress(input_buffer: Union[bytes, bytearray], output_size):
-        # output_buffer = np.zeros(output_size, dtype=np.uint8)
-
-        # out_data_p = output_buffer.ctypes.data_as(c_char_p)
         out_data_p = ctypes.create_string_buffer(output_size)
         in_data_p = ctypes.create_string_buffer(bytes(input_buffer))
-        # print(in_data_p, len(input_buffer), out_data_p, output_size)
         result = Oodle._decompress(in_data_p, len(input_buffer), out_data_p, output_size, 0, 0,
                                    0, 0, 0, 0, 0, 0, 0, 0)
         assert result >= 0, 'Error decompressing chunk'

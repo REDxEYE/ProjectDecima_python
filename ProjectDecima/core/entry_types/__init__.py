@@ -1,5 +1,6 @@
 from .dummy import CoreDummy, CoreDummy_60, CoreDummy_4
 from .entity import EntityModelInfo, EntityMeshInfo
+from .material import Material
 from .texture import Texture
 from .model import CoreModel
 from .shader import CoreShader
@@ -47,5 +48,6 @@ handlers = {
     0xb1d37c8f8304785b: ArmatureReference,
     0x5D1FB9F0D8EA70F4: UnkEntry,
     0x2ED3FA0EE459E5AC: UnkEntry2,
+    0xe844b010bf3cfd73: Material,
 
 }

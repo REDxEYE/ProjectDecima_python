@@ -151,7 +151,8 @@ class ISGN(DXChunk):
 
 _chunks = {
     b'RDEF': RDEF,
-    b'ISGN': ISGN
+    b'ISGN': ISGN,
+    b'OSGN': ISGN,
 }
 
 
@@ -183,6 +184,12 @@ class DXShader:
         for chunk in self.chunks:
             if chunk.id == b'ISGN':
                 chunk: ISGN
+                print('Input:')
                 for e in chunk.elements:
-                    print(e)
-                print("\n\n")
+                    print('\t', e)
+            if chunk.id == b'OSGN':
+                chunk: ISGN
+                print('Output:')
+                for e in chunk.elements:
+                    print('\t', e)
+        print("\n")

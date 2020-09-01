@@ -140,6 +140,8 @@ class ByteIO:
     # ------------ READ SECTION ------------ #
 
     def _read(self, size=-1) -> bytes:
+        if size>self.size()-self.file.tell():
+            raise EOFError
         return self.file.read(size)
 
     def read(self, t):
