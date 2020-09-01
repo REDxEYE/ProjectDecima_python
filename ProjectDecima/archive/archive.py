@@ -1,7 +1,8 @@
+from io import FileIO
 from pathlib import Path
 from enum import IntEnum
 from struct import pack, unpack
-from typing import List, Dict, Union
+from typing import List, Dict, Union, BinaryIO
 
 import numpy as np
 
@@ -43,6 +44,19 @@ class ArchiveHeader:
             self.chunk_table_size = reader.read_uint32()
             self.max_chunk_size = reader.read_uint32()
 
+    def dump(self, file: BinaryIO, encrypt=False):
+        data = pack('3Q2I', self.file_size, self.data_size, self.content_table_size,
+                    self.chunk_table_size,
+                    self.max_chunk_size)
+        if encrypt:
+            self.decrypt(unpack('8I', data))
+            data = pack('3Q2I', self.file_size, self.data_size, self.content_table_size,
+                        self.chunk_table_size,
+                        self.max_chunk_size)
+        file.write(
+            pack('2I', self.version, self.key))
+        file.write(data)
+
     def decrypt(self, data):
         input_key = [pack('4I', self.key, encryption_key_1[1], encryption_key_1[2], encryption_key_1[3]),
                      pack('4I', self.key + 1, encryption_key_1[1], encryption_key_1[2], encryption_key_1[3])]
@@ -75,6 +89,19 @@ class ArchiveChunk:
         else:
             (self.uncompressed_offset, self.uncompressed_size, self.key_0, self.compressed_offset, self.compressed_size,
              self.key_1) = reader.read_fmt('Q2IQ2I')
+
+    def dump(self, file: BinaryIO, encrypt=False):
+        key_0 = self.key_0
+        key_1 = self.key_1
+        data = pack('Q2IQ2I', self.uncompressed_offset, self.uncompressed_size, self.key_0,
+                    self.compressed_offset, self.compressed_size, self.key_1)
+        if encrypt:
+            self.decrypt(unpack('8I', data))
+            self.key_0 = key_0
+            self.key_1 = key_1
+            data = pack('Q2IQ2I', self.uncompressed_offset, self.uncompressed_size, self.key_0,
+                        self.compressed_offset, self.compressed_size, self.key_1)
+        file.write(data)
 
     def decrypt(self, data):
         key_0 = data[3]
@@ -109,6 +136,17 @@ class ArchiveEntry:
         else:
             (self.entry_id, self.key_0, self.hash, self.offset, self.size, self.key_1) = reader.read_fmt('2I2Q2I')
 
+    def dump(self, file: BinaryIO, encrypt=False):
+        key_0 = self.key_0
+        key_1 = self.key_1
+        data = pack('2I2Q2I', self.entry_id, self.key_0, self.hash, self.offset, self.size, self.key_1)
+        if encrypt:
+            self.decrypt(unpack('8I', data))
+            self.key_0 = key_0
+            self.key_1 = key_1
+            data = pack('2I2Q2I', self.entry_id, self.key_0, self.hash, self.offset, self.size, self.key_1)
+        file.write(data)
+
     def decrypt(self, data):
         input_key = [pack('4I', data[1], encryption_key_1[1], encryption_key_1[2], encryption_key_1[3]),
                      pack('4I', data[7], encryption_key_1[1], encryption_key_1[2], encryption_key_1[3])]
@@ -125,6 +163,7 @@ class Archive:
         self.filepath = Path(filepath)
         self.reader = ByteIODS(filepath)
         self.chunks: List[ArchiveChunk] = []
+        self.entries: List[ArchiveEntry] = []
         self.hash_to_entry: Dict[int, ArchiveEntry] = {}
 
     def to_cache(self):
@@ -159,6 +198,7 @@ class Archive:
         for _ in range(self.header.content_table_size):
             entry = ArchiveEntry()
             entry.parse(reader)
+            self.entries.append(entry)
             self.hash_to_entry[entry.hash] = entry
         ArchiveChunk.set_encrypted_flag(self.is_encrypted)
         for _ in range(self.header.chunk_table_size):
