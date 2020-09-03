@@ -1,3 +1,4 @@
+from functools import lru_cache
 from io import FileIO
 from pathlib import Path
 from enum import IntEnum
@@ -166,6 +167,8 @@ class Archive:
         self.entries: List[ArchiveEntry] = []
         self.hash_to_entry: Dict[int, ArchiveEntry] = {}
 
+        self._chunk_offset_cache = {}
+
     def to_cache(self):
         cache = {'entries': {}, 'chunks': [], 'header': self.header.__dict__}
         for key, entry in self.hash_to_entry.items():
@@ -182,9 +185,10 @@ class Archive:
             entry = ArchiveEntry()
             entry.__dict__.update(value)
             self.hash_to_entry[int(key)] = entry
-        for value in cache['chunks']:
+        for n, value in enumerate(cache['chunks']):
             chunk = ArchiveChunk()
             chunk.__dict__.update(value)
+            self._chunk_offset_cache[chunk.uncompressed_offset] = n
             self.chunks.append(chunk)
 
     @property
@@ -201,9 +205,10 @@ class Archive:
             self.entries.append(entry)
             self.hash_to_entry[entry.hash] = entry
         ArchiveChunk.set_encrypted_flag(self.is_encrypted)
-        for _ in range(self.header.chunk_table_size):
+        for n in range(self.header.chunk_table_size):
             chunk = ArchiveChunk()
             chunk.parse(reader)
+            self._chunk_offset_cache[chunk.uncompressed_offset] = n
             self.chunks.append(chunk)
 
     def get_chunk_boundaries(self, file_id: int):
@@ -222,26 +227,22 @@ class Archive:
         last_chunk_row = self.chunk_id_by_offset(last_chunk)
         return first_chunk_row, last_chunk_row
 
+    @lru_cache(maxsize=128)
     def chunk_id_by_offset(self, offset):
-        for i, chunk in enumerate(self.chunks):
-            if chunk.uncompressed_offset == offset:
-                return i
-
-        return -1
+        return self._chunk_offset_cache.get(offset, -1)
 
     def get_file_data(self, entry: ArchiveEntry):
         first_chunk, last_chunk = self.get_chunk_boundaries(entry.hash)
         total_data = bytearray()
-        output_size = 0
+        output_size = ((last_chunk - first_chunk) + 1) * self.header.max_chunk_size
+        self.reader.seek(self.chunks[first_chunk].compressed_offset)
         for i in range(first_chunk, last_chunk + 1):
             chunk = self.chunks[i]
-            self.reader.seek(chunk.compressed_offset)
             chunk_data = self.reader.read_bytes(chunk.compressed_size)
             if self.is_encrypted:
                 key = pack('Q2I', chunk.uncompressed_offset, chunk.uncompressed_size, chunk.key_0)
                 chunk_data = decrypt_chunk_data(chunk_data, key)
             total_data.extend(chunk_data)
-            output_size += chunk.uncompressed_size
         file_position = entry.offset % self.header.max_chunk_size
         decompressed_data = Oodle.decompress(total_data, output_size)
 
