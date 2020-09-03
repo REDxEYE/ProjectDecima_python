@@ -18,7 +18,10 @@ class StreamReference:
         archive_array: ArchiveSet
         for ref in cls._all_refs:
             print(f'Loading referenced stream: {ref.stream_path.string}')
-            ref.stream_reader = ByteIODS(archive_array.queue_file(ref.stream_path.string, False))
+            stream_path = ref.stream_path.string
+            if not stream_path.endswith('.core.stream'):
+                stream_path += '.core.stream'
+            ref.stream_reader = ByteIODS(archive_array.queue_file(stream_path, False))
 
     def __init__(self):
         self.stream_path = UnHashedString()
