@@ -7,6 +7,7 @@ from .shader import CoreShader
 from .armature import Armature, ArmatureReference
 from .bone_data import CoreBoneData
 from .texture_set import TextureSet
+from .translation import Translation, VoiceRef, VoiceTranslation, SpeakerInfo
 from .unk_entry import BoneRelatedEntry, MaterialReference, UnkEntry, UnkEntry2
 from .sound_bank import SoundDesc, WWiseSound
 from .collection import CoreRefCollection
@@ -49,5 +50,9 @@ handlers = {
     0x5D1FB9F0D8EA70F4: UnkEntry,
     0x2ED3FA0EE459E5AC: UnkEntry2,
     0xe844b010bf3cfd73: Material,
+    0x31be502435317445: Translation,
+    0xAD7F486B5DD745A4: VoiceRef,
+    0xC726DF870437D774: VoiceTranslation,
+    0xE676A549155DA53B: SpeakerInfo,
 
 }
