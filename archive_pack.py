@@ -56,34 +56,82 @@ class ArchivePacker:
             print('\n')
         print(f'Created temporary buffer')
 
-    def create_chunks(self):
+    def create_chunks2(self):
         print('Creating chunks')
         total_data_size = sum([v[1] for v in self.files])
         estimated_chunk_count = math.ceil(total_data_size / self._chunk_max_size)
-        chunk_data_start_offset = len(self.entries) * 32 + estimated_chunk_count * 32 + 32+8
+        chunk_data_start_offset = len(self.entries) * 32 + estimated_chunk_count * 32 + 32 + 8
+        chunk_buffer = bytes()
+        uncompressed_offset = 0
+        accumulative_offset = 0
+
+        def create_chunk(data, output_file, offset):
+            chunk = ArchiveChunk()
+            chunk.uncompressed_offset = offset
+            chunk.uncompressed_size = len(data)
+            offset += chunk.uncompressed_size
+            compressed_data = Oodle.compress(data)
+            chunk.compressed_size = len(compressed_data)
+            chunk.compressed_offset = chunk_data_start_offset + output_file.tell()
+            chunk.key_0 = (chunk.uncompressed_size ^ chunk.uncompressed_offset) & 0xFFFFFFFF
+            chunk.key_1 = (chunk.compressed_size ^ chunk.compressed_offset) & 0xFFFFFFFF
+            if self._encrypt:
+                compressed_data = self._encrypt_chunk(chunk, compressed_data)
+            output_file.write(compressed_data)
+            self.chunks.append(chunk)
+            return offset
+
+        total_size = 0
         with self._compressed_chunk_buffer_path.open('wb') as compressed_buffer:
-            with self._raw_chunk_buffer_path.open('rb') as raw_buffer:
-                for i in range(estimated_chunk_count):
-                    print(f'\rCompressing {i + 1}/{estimated_chunk_count} chunk', end='')
-                    chunk = ArchiveChunk()
-                    chunk.uncompressed_offset = raw_buffer.tell()
-                    raw_data = raw_buffer.read(self._chunk_max_size)
-                    chunk.uncompressed_size = len(raw_data)
+            for i, ((file, size), (entry, _)) in enumerate(zip(self.files, self.entries)):
+                entry.offset = accumulative_offset
+                accumulative_offset += size
+                local_chunk_count = 0
+                per_file_chunk_count = math.ceil(size / self._chunk_max_size)
+                with file.open('rb') as f:
+                    total_size += size
+                    chunk_buffer += f.read()
+                while len(chunk_buffer) >= self._chunk_max_size:
+                    chunk_data = chunk_buffer[:self._chunk_max_size]
+                    chunk_buffer = chunk_buffer[self._chunk_max_size:]
+                    uncompressed_offset = create_chunk(chunk_data, compressed_buffer, uncompressed_offset)
+                    local_chunk_count += 1
+                    print(
+                        f'\rCompressing {file.stem} file {local_chunk_count}/{per_file_chunk_count}. Total progress {len(self.chunks)}/{estimated_chunk_count}',
+                        end='')
+            create_chunk(chunk_buffer, compressed_buffer, uncompressed_offset)
+            # print(f'\rCompressing {i + 1}/{entry_count} files', end='')
+            print('\nCompressed all files!')
 
-                    compressed_data = Oodle.compress(raw_data)
-                    chunk.compressed_size = len(compressed_data)
-                    chunk.compressed_offset = chunk_data_start_offset+compressed_buffer.tell()
-
-                    chunk.key_0 = (chunk.uncompressed_size ^ chunk.uncompressed_offset) & 0xFFFFFFFF
-                    chunk.key_1 = (chunk.compressed_size ^ chunk.compressed_offset) & 0xFFFFFFFF
-
-                    if self._encrypt:
-                        compressed_data = self._encrypt_chunk(chunk, compressed_data)
-                    compressed_buffer.write(compressed_data)
-
-                    self.chunks.append(chunk)
-                print('\n')
-        print(f'Created {estimated_chunk_count} chunks')
+    #
+    # def create_chunks(self):
+    #     print('Creating chunks')
+    #     total_data_size = sum([v[1] for v in self.files])
+    #     estimated_chunk_count = math.ceil(total_data_size / self._chunk_max_size)
+    #     chunk_data_start_offset = len(self.entries) * 32 + estimated_chunk_count * 32 + 32 + 8
+    #     with self._compressed_chunk_buffer_path.open('wb') as compressed_buffer:
+    #         with self._raw_chunk_buffer_path.open('rb') as raw_buffer:
+    #             for i in range(estimated_chunk_count):
+    #                 print(f'\rCompressing {i + 1}/{estimated_chunk_count} chunk', end='')
+    #                 chunk = ArchiveChunk()
+    #                 chunk.uncompressed_offset = raw_buffer.tell()
+    #                 raw_data = raw_buffer.read(self._chunk_max_size)
+    #                 chunk.uncompressed_size = len(raw_data)
+    #
+    #                 compressed_data = Oodle.compress(raw_data)
+    #                 chunk.compressed_size = len(compressed_data)
+    #                 chunk.compressed_offset = chunk_data_start_offset + compressed_buffer.tell()
+    #
+    #                 chunk.key_0 = (chunk.uncompressed_size ^ chunk.uncompressed_offset) & 0xFFFFFFFF
+    #                 chunk.key_1 = (chunk.compressed_size ^ chunk.compressed_offset) & 0xFFFFFFFF
+    #
+    #                 if self._encrypt:
+    #                     compressed_data = self._encrypt_chunk(chunk, compressed_data)
+    #                 compressed_buffer.write(compressed_data)
+    #
+    #                 self.chunks.append(chunk)
+    #             print('\n')
+    #     print(f'Created {estimated_chunk_count} chunks')
 
     def _encrypt_chunk(self, chunk: ArchiveChunk, chunk_data: bytes):
         key = pack('Q2I', chunk.uncompressed_offset, chunk.uncompressed_size, chunk.key_0)
@@ -108,7 +156,7 @@ class ArchivePacker:
                 chunk.dump(arc, self._encrypt)
             with self._compressed_chunk_buffer_path.open('rb') as f:
                 while True:
-                    data = f.read(8192)
+                    data = f.read(65535)
                     if not data:
                         break
                     arc.write(data)
@@ -121,12 +169,12 @@ class ArchivePacker:
 
 
 if __name__ == '__main__':
-    a = ArchivePacker(r'F:\SteamLibrary\steamapps\common\Death Stranding\dump\477e458b2c825633499874678a2b9ea5',
-                      '477e458b2c825633499874678a2b9ea5', False)
+    a = ArchivePacker(r'F:\SteamLibrary\steamapps\common\Death Stranding\dump\7017f9bb9d52fc1c4433599203cc51b1',
+                      '7017f9bb9d52fc1c4433599203cc51b1', False)
     a.collect_files()
     a.create_entries()
-    a.dump_to_temp_file()
-    a.create_chunks()
+    # a.dump_to_temp_file()
+    a.create_chunks2()
     a.write_archive()
     a.finish()
     pass

@@ -1,3 +1,4 @@
+import mmap
 import os
 from pathlib import Path
 from struct import pack
@@ -15,8 +16,9 @@ def dump_archive(archive_path: str, dump_path: str):
     archive = Archive(archive_path)
     archive.parse()
     os.makedirs(archive_dump_path, exist_ok=True)
-    for entry in archive.entries:
-        print(f"Writing {entry.entry_id}-{entry.hash}.bin file")
+    total = len(archive.entries)
+    for n, entry in enumerate(archive.entries):
+        print(f"Writing {n + 1}/{total} {entry.entry_id}-{entry.hash}.bin file")
         data = archive.get_file_data(entry)
         with open(archive_dump_path / f'{entry.entry_id}-{entry.hash}.bin', 'wb') as f:
             f.write(data)
@@ -24,5 +26,5 @@ def dump_archive(archive_path: str, dump_path: str):
 
 if __name__ == '__main__':
     dump_path = Path(r'F:\SteamLibrary\steamapps\common\Death Stranding\dump')
-    archive_path = r"F:\SteamLibrary\steamapps\common\Death Stranding\data\477e458b2c825633499874678a2b9ea5.bin"
+    archive_path = r"F:\SteamLibrary\steamapps\common\Death Stranding\data\7017f9bb9d52fc1c4433599203cc51b1.bin"
     dump_archive(archive_path, dump_path)
