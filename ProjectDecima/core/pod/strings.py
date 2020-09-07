@@ -1,17 +1,15 @@
-class HashedString:
+class HashedString(str):
 
-    def __init__(self, hash=0, string=''):
-        self.hash = hash
-        self.string = string
+    def __new__(cls, string='', string_hash=0, *args, **kwargs):
+        new_str =  super(HashedString, cls).__new__(cls, string)
+        new_str.hash = string_hash
+        return new_str
 
-    def __str__(self):
-        return self.string
+    def __init__(self, string='', string_hash=0):
+        self.hash = string_hash
 
 
-class UnHashedString:
+class UnHashedString(str):
 
-    def __init__(self, string=''):
-        self.string = string
-
-    def __str__(self):
-        return self.string
+    def __new__(cls, string='', *args, **kwargs):
+        return super(UnHashedString, cls).__new__(cls, string)

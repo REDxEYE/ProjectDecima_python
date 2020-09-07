@@ -10,7 +10,7 @@ class ByteIODS(ByteIO):
 
     def read_hashed_string(self):
         size, hs = self.read_fmt('2I')
-        return HashedString(hs, self.read_bytes(size).decode('utf'))
+        return HashedString(self.read_bytes(size).decode('utf'), hs)
 
     def read_unhashed_string(self):
         size = self.read_uint32()
