@@ -3,6 +3,7 @@ from typing import List
 from uuid import UUID
 
 from . import CoreDummy
+from ..core_entry_handler_manager import EntryTypeManager
 from ...core.stream_reference import StreamReference
 from ..entry_reference import EntryReference
 from ...utils.byte_io import ByteIO
@@ -88,6 +89,7 @@ class MatEntry:
 
 
 class Material(CoreDummy):
+    magic = 0xe844b010bf3cfd73
 
     def __init__(self):
         super().__init__()
@@ -107,3 +109,6 @@ class Material(CoreDummy):
             except struct.error:
                 break
             self.entries.append(entry)
+
+
+EntryTypeManager.register_handler(Material)

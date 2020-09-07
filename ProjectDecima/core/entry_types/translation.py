@@ -5,6 +5,7 @@ from typing import List, Dict
 from uuid import UUID
 
 from . import CoreDummy
+from ..core_entry_handler_manager import EntryTypeManager
 from ..entry_reference import EntryReference
 from ..pod.strings import HashedString
 from ..stream_reference import StreamReference
@@ -38,6 +39,7 @@ language_list = ["English",
 
 
 class SpeakerInfo(CoreDummy):
+    magic = 0xE676A549155DA53B
 
     def __init__(self):
         super().__init__()
@@ -52,7 +54,11 @@ class SpeakerInfo(CoreDummy):
         self.localized_name.parse(reader, core_file)
 
 
+EntryTypeManager.register_handler(SpeakerInfo)
+
+
 class VoiceRef(CoreDummy):
+    magic = 0xAD7F486B5DD745A4
     exportable = True
 
     def __init__(self):
@@ -85,9 +91,9 @@ class VoiceRef(CoreDummy):
             return
 
         output_json = {}
-        lang_output_path = output_path / speaker.name.string
+        lang_output_path = output_path / speaker.name
         os.makedirs(lang_output_path, exist_ok=True)
-        print(f'Exporting translation {speaker.name.string} to {lang_output_path}')
+        print(f'Exporting translation {speaker.name} to {lang_output_path}')
 
         for lang in language_list:
             localized_speaker = speaker_translation.translations[lang]
@@ -95,9 +101,9 @@ class VoiceRef(CoreDummy):
             localized_voice = voice.voices.get(lang, None) if voice else None
             output_json[lang] = {'speaker_name': localized_speaker.dump(),
                                  'text_line': localized_text.dump(),
-                                 'voice_line_name': f'{lang}_{Path(localized_voice.stream_path.string).stem}' if localized_voice else "NO_DATA"}
+                                 'voice_line_name': f'{lang}_{Path(localized_voice.stream_path).stem}' if localized_voice else "NO_DATA"}
             if localized_voice:
-                with (lang_output_path / f'{lang}_{Path(localized_voice.stream_path.string).stem}').open('wb') as f:
+                with (lang_output_path / f'{lang}_{Path(localized_voice.stream_path).stem}').open('wb') as f:
                     f.write(localized_voice.stream_reader.read_bytes(-1))
         with (lang_output_path / f'translation_info_{self.guid}.json').open('w', encoding='utf-8') as f:
             json.dump(output_json, f, ensure_ascii=False, indent=4)
@@ -105,7 +111,11 @@ class VoiceRef(CoreDummy):
             pass
 
 
+EntryTypeManager.register_handler(VoiceRef)
+
+
 class VoiceTranslation(CoreDummy):
+    magic = 0xC726DF870437D774
 
     def __init__(self):
         super().__init__()
@@ -126,7 +136,7 @@ class VoiceTranslation(CoreDummy):
         while reader:
             stream_ref = StreamReference()
             stream_ref.parse(reader)
-            lang = stream_ref.stream_path.string.split('.')[-1].capitalize()
+            lang = stream_ref.stream_path.split('.')[-1].capitalize()
             if lang == 'Chinese':
                 lang = 'Chinese (Simplified)'
             if lang == 'Latampor':
@@ -137,7 +147,12 @@ class VoiceTranslation(CoreDummy):
             reader.skip(1)
 
 
+EntryTypeManager.register_handler(VoiceTranslation)
+
+
 class Translation(CoreDummy):
+    magic = 0x31be502435317445
+
     class Language:
         def __init__(self):
             self.string = ''
@@ -166,3 +181,6 @@ class Translation(CoreDummy):
 
         for lang in language_list:
             self.translations[lang] = self.Language().parse(reader)
+
+
+EntryTypeManager.register_handler(Translation)

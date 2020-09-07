@@ -1,12 +1,15 @@
 from typing import List
 
 from .. import CoreDummy
+from ...core_entry_handler_manager import EntryTypeManager
 from ...entry_reference import EntryReference
 from ....utils.byte_io_ds import ByteIODS
 from ...pod.core_header import CoreHeader
 
 
 class LevelTileCollection(CoreDummy):
+    magic = 0x3c0d150db02d8c80
+
     def __init__(self):
         super().__init__()
         self.header = CoreHeader()
@@ -22,3 +25,6 @@ class LevelTileCollection(CoreDummy):
             ref.parse(reader, core_file)
             self.refs.append(ref)
         reader.skip(12)
+
+
+EntryTypeManager.register_handler(LevelTileCollection)

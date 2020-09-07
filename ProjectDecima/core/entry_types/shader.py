@@ -2,6 +2,7 @@ from enum import IntEnum
 from typing import List
 
 from . import CoreDummy
+from ..core_entry_handler_manager import EntryTypeManager
 from ...utils.byte_io import ByteIO
 from ...utils.byte_io_ds import ByteIODS
 from ...utils.dx_shader.shader import DXShader
@@ -32,6 +33,7 @@ class ShaderEntry:
 
 
 class CoreShader(CoreDummy):
+    magic = 0x16bb69a9e5aa0d9e
 
     def __init__(self):
         super().__init__()
@@ -48,3 +50,6 @@ class CoreShader(CoreDummy):
         for _ in range(shader_count):
             shader = ShaderEntry().parse(reader)
             self.shaders.append(shader)
+
+
+EntryTypeManager.register_handler(CoreShader)

@@ -2,12 +2,14 @@ from typing import List
 from uuid import UUID
 
 from . import CoreDummy
+from ..core_entry_handler_manager import EntryTypeManager
 from ...core.stream_reference import StreamReference
 from ..entry_reference import EntryReference
 from ...utils.byte_io_ds import ByteIODS
 
 
 class EntityModelInfo(CoreDummy):
+    magic = 0x452a16dd4427b5db
 
     def __init__(self):
         super().__init__()
@@ -29,7 +31,12 @@ class EntityModelInfo(CoreDummy):
         self.ref_3.parse(reader, core_file)
 
 
+EntryTypeManager.register_handler(EntityModelInfo)
+
+
 class EntityMeshInfo(CoreDummy):
+    magic = 0xBC79DACC10E13CB7
+
     def __init__(self):
         super().__init__()
         self.part_ref = EntryReference()
@@ -50,3 +57,5 @@ class EntityMeshInfo(CoreDummy):
         self.armature_ref_1.parse(reader, core_file)
         assert sum(reader.read_fmt('10B')) == 0
 
+
+EntryTypeManager.register_handler(EntityMeshInfo)

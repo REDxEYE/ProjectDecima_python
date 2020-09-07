@@ -3,6 +3,7 @@ from pathlib import Path
 from uuid import UUID
 
 from . import CoreDummy
+from ..core_entry_handler_manager import EntryTypeManager
 from ...core.stream_reference import StreamReference
 from ...utils.byte_io_ds import ByteIODS
 
@@ -26,6 +27,7 @@ class TexturePixelFormat(IntEnum):
 
 
 class Texture(CoreDummy):
+    magic = 0xA664164D69FD2B38
 
     def __init__(self):
         super().__init__()
@@ -85,4 +87,7 @@ class Texture(CoreDummy):
                 im = Image.frombuffer(pixel_info[0], (self.width, self.height),
                                       self.stream.stream_reader.read_bytes(size),
                                       *pixel_info[1])
-                im.save(base_dir / (self.stream.stream_path.string + '.tga'))
+                im.save(base_dir / (self.stream.stream_path + '.tga'))
+
+
+EntryTypeManager.register_handler(Texture)

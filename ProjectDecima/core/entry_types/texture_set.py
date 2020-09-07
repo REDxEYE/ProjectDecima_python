@@ -1,6 +1,7 @@
 from typing import List
 
 from . import CoreDummy
+from ..core_entry_handler_manager import EntryTypeManager
 from ..pod.strings import HashedString
 from ...utils.byte_io_ds import ByteIODS
 from ..entry_reference import EntryReference
@@ -45,6 +46,8 @@ class SrcEntry:
 
 
 class TextureSet(CoreDummy):
+    magic = 0xA321E8C307328D2E
+
     def __init__(self):
         super().__init__()
         self.ts_entries: List[TSEntry] = []
@@ -65,3 +68,6 @@ class TextureSet(CoreDummy):
             entry = SrcEntry()
             entry.parse(reader)
             self.src_entries.append(entry)
+
+
+EntryTypeManager.register_handler(TextureSet)

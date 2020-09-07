@@ -1,11 +1,13 @@
 from typing import List
 
 from . import CoreDummy
+from ..core_entry_handler_manager import EntryTypeManager
 from ...utils.byte_io_ds import ByteIODS
 from ..entry_reference import EntryReference
 
 
 class BoneRelatedEntry(CoreDummy):
+    magic = 0x118378C2F191097A
 
     def __init__(self):
         super().__init__()
@@ -23,7 +25,12 @@ class BoneRelatedEntry(CoreDummy):
         self.bone_remap = reader.read_fmt(f'{self.unk_1_count}H')
 
 
+EntryTypeManager.register_handler(BoneRelatedEntry)
+
+
 class UnkEntry(CoreDummy):
+    magic = 0x5D1FB9F0D8EA70F4
+
     def __init__(self):
         super().__init__()
         self.unk_0 = 0
@@ -42,7 +49,12 @@ class UnkEntry(CoreDummy):
         self.ref.parse(reader, core_file)
 
 
+EntryTypeManager.register_handler(UnkEntry)
+
+
 class UnkEntry2(CoreDummy):
+    magic = 0x2ED3FA0EE459E5AC
+
     def __init__(self):
         super().__init__()
         self.unk_0 = 0
@@ -60,10 +72,14 @@ class UnkEntry2(CoreDummy):
         self.part_mesh_ref.parse(reader, core_file)
         if not no_second_guid:
             self.ref.parse(reader, core_file)
-        reader.skip(82+int(not no_second_guid))
+        reader.skip(82 + int(not no_second_guid))
+
+
+EntryTypeManager.register_handler(UnkEntry2)
 
 
 class MaterialReference(CoreDummy):
+    magic = 0xFE2843D4AAD255E7
 
     def __init__(self, ):
         super().__init__()
@@ -75,3 +91,6 @@ class MaterialReference(CoreDummy):
         self.guid = reader.read_guid()
         self.guid_0.parse(reader, core_file)
         self.unk_0 = reader.read_uint8()
+
+
+EntryTypeManager.register_handler(MaterialReference)

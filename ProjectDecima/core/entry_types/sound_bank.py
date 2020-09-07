@@ -1,13 +1,16 @@
 from pathlib import Path
-from typing import List, Dict, Type
+from typing import List, Dict, Type, Tuple
 
 from . import CoreDummy
+from ..core_entry_handler_manager import EntryTypeManager
 from ..entry_reference import EntryReference
+from ..pod.strings import UnHashedString
 from ...utils.byte_io_ds import ByteIODS
 from ...utils.wwise_sound_bank.section_info import BKHD, DIDX, WWiseSection, DATA, GenericBlock
 
 
 class SoundDesc(CoreDummy):
+    magic = 0xEB0930FE3433F89F
 
     def __init__(self):
         super().__init__()
@@ -23,7 +26,11 @@ class SoundDesc(CoreDummy):
             self.sound_refs.append(ref)
 
 
+EntryTypeManager.register_handler(SoundDesc)
+
+
 class WWiseSound(CoreDummy):
+    magic = 0x150c273beb8f2d0c
     _sections_handlers = {
         b'BKHD': BKHD,
         b'DIDX': DIDX,
@@ -80,3 +87,6 @@ class WWiseSound(CoreDummy):
         for n, file in enumerate(self.wave_files):
             with (base_dir / f'file_{n}.wem').open('wb') as f:
                 f.write(file)
+
+
+EntryTypeManager.register_handler(WWiseSound)

@@ -1,6 +1,7 @@
 from typing import List
 
 from . import CoreDummy
+from ..core_entry_handler_manager import EntryTypeManager
 from ..entry_reference import EntryReference
 from ..pod.strings import HashedString
 from ...utils.byte_io_ds import ByteIODS
@@ -40,6 +41,7 @@ class UnkData1:
 
 
 class Armature(CoreDummy):
+    magic = 0x11E1D1A40B933E66
 
     def __init__(self):
         super().__init__()
@@ -68,13 +70,17 @@ class Armature(CoreDummy):
             unk = UnkData1()
             unk.parse(reader)
             self.unk_data_1.append(unk)
-        if reader.peek_uint64()==0:
+        if reader.peek_uint64() == 0:
             self.unks_2 = reader.read_fmt('20I')
         unks_2_count = reader.read_uint32()
         self.unks_2 = reader.read_fmt(f'{unks_2_count}H')
 
 
+EntryTypeManager.register_handler(Armature)
+
+
 class ArmatureReference(CoreDummy):
+    magic = 0xb1d37c8f8304785b
 
     def __init__(self):
         super().__init__()
@@ -86,3 +92,6 @@ class ArmatureReference(CoreDummy):
         self.guid = reader.read_guid()
         self.unk_entry_ref.parse(reader, core_file)
         self.armature_ref.parse(reader, core_file)
+
+
+EntryTypeManager.register_handler(ArmatureReference)

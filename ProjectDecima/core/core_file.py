@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List, Union
 from uuid import UUID
 
+from .core_entry_handler_manager import EntryTypeManager
 from .entry_reference import EntryReference
 from ..utils.byte_io_ds import ByteIODS
 
@@ -37,19 +38,9 @@ class CoreFile:
                 res.append(entry)
         return res
 
-    @staticmethod
-    def get_handler(magic) -> type(CoreDummy):
-        return handlers.get(magic, CoreDummy)
-
     def parse(self):
         while self.reader:
-            core_entry_class = self.get_handler(self.reader.peek_uint64())
-            core_entry: CoreDummy = core_entry_class()
-            start = self.reader.tell()
-            _, size = self.reader.peek_fmt('QI')
-            sub_reader = ByteIODS(self.reader.read_bytes(size + 12))
-            core_entry.parse(sub_reader, self)
-            self.reader.seek(start + core_entry.header.size + 12)
+            core_entry = EntryTypeManager.handle(self.reader, self)
             self.entries.append(core_entry)
         self.resolve_local_links()
 

@@ -1,12 +1,14 @@
 from typing import List
 
 from . import CoreDummy
+from ..core_entry_handler_manager import EntryTypeManager
 from ...core.stream_reference import StreamReference
 from ..entry_reference import EntryReference
 from ...utils.byte_io_ds import ByteIODS
 
 
 class CoreModel(CoreDummy):
+    magic = 0xE2A812418ABC2172
 
     def __init__(self):
         super().__init__()
@@ -44,3 +46,6 @@ class CoreModel(CoreDummy):
             self.materials.append(ref)
         reader.skip(1)
         self.mesh_stream.parse(reader)
+
+
+EntryTypeManager.register_handler(CoreModel)

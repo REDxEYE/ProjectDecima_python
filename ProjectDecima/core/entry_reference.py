@@ -37,8 +37,8 @@ class EntryReference:
                 cls._global_refs.remove(ref)
                 continue
             if ref.load_method in [LoadMethod.ImmediateCoreFile, LoadMethod.CoreFile]:
-                print(f'Loading referenced core file: {ref._file_ref.string}')
-                core = archive_array.queue_file(ref._file_ref.string, True)
+                print(f'Loading referenced core file: {ref._file_ref}')
+                core = archive_array.queue_file(ref._file_ref, True)
                 ref.ref = core.get_by_guid(ref.guid)
                 ref._core_file = core
             if ref.ref:
@@ -48,7 +48,7 @@ class EntryReference:
     def __init__(self):
         self.load_method = LoadMethod(0)
         self.guid = UUID(int=0)
-        self._file_ref = HashedString(0, '')
+        self._file_ref = HashedString()
         self.ref = None
         self._core_file = None
 

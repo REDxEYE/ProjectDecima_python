@@ -2,11 +2,13 @@ from pathlib import Path
 from typing import List, Dict, Type
 
 from . import CoreDummy
+from ..core_entry_handler_manager import EntryTypeManager
 from ..entry_reference import EntryReference
 from ...utils.byte_io_ds import ByteIODS
 
 
 class UnkSongBlock(CoreDummy):
+    magic = 0x256E8E4E5646F75A
 
     def __init__(self):
         super().__init__()
@@ -40,7 +42,12 @@ class UnkSongBlock(CoreDummy):
         self.ref_5.parse(reader, core_file)
 
 
+EntryTypeManager.register_handler(UnkSongBlock)
+
+
 class SongInfo(CoreDummy):
+    magic = 0xDAFEAE13C7269562
+
     def __init__(self):
         super().__init__()
         self.unk_0 = 0
@@ -63,7 +70,12 @@ class SongInfo(CoreDummy):
         self.ref_5.parse(reader, core_file)
 
 
+EntryTypeManager.register_handler(SongInfo)
+
+
 class UnkBlock(CoreDummy):
+    magic = 0x17FF4558067CC876
+
     def __init__(self):
         super().__init__()
         self.unk_0 = 0
@@ -78,7 +90,12 @@ class UnkBlock(CoreDummy):
         self.artist_name.parse(reader, core_file)
 
 
+EntryTypeManager.register_handler(UnkBlock)
+
+
 class UnkBlock2(CoreDummy):
+    magic = 0x1749BDEE3A132B09
+
     def __init__(self):
         super().__init__()
         self.unk_0 = 0
@@ -86,7 +103,7 @@ class UnkBlock2(CoreDummy):
         self.unk_2 = 0
         self.song_info = EntryReference()
         self.song_name = EntryReference()
-        self.ref_2 = EntryReference()
+        self.control_object = EntryReference()
 
     def parse(self, reader: ByteIODS, core_file):
         self.header.parse(reader)
@@ -96,4 +113,7 @@ class UnkBlock2(CoreDummy):
         self.unk_2 = reader.read_uint32()
         self.song_info.parse(reader, core_file)
         self.song_name.parse(reader, core_file)
-        self.ref_2.parse(reader, core_file)
+        self.control_object.parse(reader, core_file)
+
+
+EntryTypeManager.register_handler(UnkBlock2)

@@ -1,12 +1,14 @@
 from uuid import UUID
 
 from . import CoreDummy
+from ..core_entry_handler_manager import EntryTypeManager
 from ..stream_reference import StreamReference
 from ...utils.byte_io_ds import ByteIODS
 from ..entry_reference import EntryReference
 
 
 class IndicesInfo(CoreDummy):
+    magic = 0x5FE633B37CEDBF84
 
     def __init__(self):
         super().__init__()
@@ -22,7 +24,11 @@ class IndicesInfo(CoreDummy):
         self.unk_guid = reader.read_guid()
 
 
+EntryTypeManager.register_handler(IndicesInfo)
+
+
 class UnkVertexInfo(CoreDummy):
+    magic = 0x8EB29E71F97E460F
 
     def __init__(self):
         super().__init__()
@@ -42,7 +48,12 @@ class UnkVertexInfo(CoreDummy):
         self.unks_2 = reader.read_fmt('3I')
 
 
+EntryTypeManager.register_handler(UnkVertexInfo)
+
+
 class MeshStreamInfo(CoreDummy):
+    magic = 0xA4341E94120AA306
+
     def __init__(self):
         super().__init__()
         self.unks_0 = []
@@ -55,7 +66,11 @@ class MeshStreamInfo(CoreDummy):
         self.mesh_stream.parse(reader)
 
 
+EntryTypeManager.register_handler(MeshStreamInfo)
+
+
 class MeshInfo(CoreDummy):
+    magic = 0xEE49D93DA4C1F4B8
 
     def __init__(self):
         super().__init__()
@@ -75,7 +90,11 @@ class MeshInfo(CoreDummy):
         self.index_count = reader.read_uint32()
 
 
-class Vectices(CoreDummy):
+EntryTypeManager.register_handler(MeshInfo)
+
+
+class Vertices(CoreDummy):
+    magic = 0x3AC29A123FAABAB4
 
     def __init__(self):
         super().__init__()
@@ -89,3 +108,6 @@ class Vectices(CoreDummy):
         self.vertex_count = reader.read_uint32()
         self.unks_0 = reader.read_fmt(f'={72 // 4}I')
         # self.guid_0.parse(reader, core_file)
+
+
+EntryTypeManager.register_handler(Vertices)
