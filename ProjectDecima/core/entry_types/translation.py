@@ -1,3 +1,6 @@
+import json
+import os
+from pathlib import Path
 from typing import List, Dict
 from uuid import UUID
 
@@ -50,6 +53,7 @@ class SpeakerInfo(CoreDummy):
 
 
 class VoiceRef(CoreDummy):
+    exportable = True
 
     def __init__(self):
         super().__init__()
@@ -70,6 +74,35 @@ class VoiceRef(CoreDummy):
         # reader.skip(18)
         self.speaker_name_localized_ref.parse(reader, core_file)
 
+    def dump(self, output_path: Path):
+        text: Translation = self.text_lines_localized_ref.ref
+        voice: VoiceTranslation = self.voice_lines_localized_ref.ref
+        speaker: SpeakerInfo = self.speaker_name_localized_ref.ref
+        if not all([text, voice, speaker, text]):
+            return
+        speaker_translation: Translation = speaker.localized_name.ref
+        if not speaker_translation:
+            return
+
+        output_json = {}
+        lang_output_path = output_path / speaker.name.string
+        os.makedirs(lang_output_path, exist_ok=True)
+
+        for lang in language_list:
+            localized_speaker = speaker_translation.translations[lang]
+            localized_text = text.translations[lang]
+            localized_voice = voice.voices.get(lang, None)
+            output_json[lang] = {'speaker_name': localized_speaker.dump(),
+                                 'text_line': localized_text.dump(),
+                                 'voice_line_name': f'{lang}_{Path(localized_voice.stream_path.string).stem}' if localized_voice else "NO_DATA"}
+            if localized_voice:
+                with (lang_output_path / f'{lang}_{Path(localized_voice.stream_path.string).stem}').open('wb') as f:
+                    f.write(localized_voice.stream_reader.read_bytes(-1))
+        with (lang_output_path / f'translation_info_{self.guid}.json').open('w', encoding='utf-8') as f:
+            json.dump(output_json, f, ensure_ascii=False, indent=4)
+
+            pass
+
 
 class VoiceTranslation(CoreDummy):
 
@@ -78,7 +111,7 @@ class VoiceTranslation(CoreDummy):
         self.sentence_id = HashedString()
         self.sound_group_settings_ref = EntryReference()
         self.wwise_localized_sound_presets_ref = EntryReference()
-        self.voices = []
+        self.voices: Dict[str, StreamReference] = {}
 
     def parse(self, reader: ByteIODS, core_file):
         self.header.parse(reader)
@@ -92,7 +125,14 @@ class VoiceTranslation(CoreDummy):
         while reader:
             stream_ref = StreamReference()
             stream_ref.parse(reader)
-            self.voices.append(stream_ref)
+            lang = stream_ref.stream_path.string.split('.')[-1].capitalize()
+            if lang == 'Chinese':
+                lang = 'Chinese (Simplified)'
+            if lang == 'Latampor':
+                lang = 'Portuguese (Brazil)'
+            if lang == 'Latamsp':
+                lang = 'Spanish (Mexico)'
+            self.voices[lang] = stream_ref
             reader.skip(1)
 
 
@@ -108,6 +148,9 @@ class Translation(CoreDummy):
             self.comment = reader.read_ascii_string(reader.read_uint16())
             self.flag = reader.read_uint8()
             return self
+
+        def dump(self):
+            return {'string': self.string, 'comment': self.comment, 'flag': self.flag}
 
         def __repr__(self):
             return f'<Localized string: "{self.string}" : {self.comment}>'
