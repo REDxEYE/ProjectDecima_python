@@ -1,4 +1,5 @@
 from .dummy import CoreDummy, CoreDummy_60, CoreDummy_4
+from .song_info import UnkSongBlock, SongInfo, UnkBlock, UnkBlock2
 from .entity import EntityModelInfo, EntityMeshInfo
 from .material import Material
 from .texture import Texture
@@ -54,5 +55,9 @@ handlers = {
     0xAD7F486B5DD745A4: VoiceRef,
     0xC726DF870437D774: VoiceTranslation,
     0xE676A549155DA53B: SpeakerInfo,
+    0x256E8E4E5646F75A: UnkSongBlock,
+    0xDAFEAE13C7269562: SongInfo,
+    0x17FF4558067CC876: UnkBlock,
+    0x1749BDEE3A132B09: UnkBlock2,
 
 }

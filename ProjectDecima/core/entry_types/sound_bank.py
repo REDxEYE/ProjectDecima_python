@@ -37,7 +37,7 @@ class WWiseSound(CoreDummy):
         self.unk_1 = 0
         self.sections: Dict[bytes, WWiseSection] = {}
         self.wave_files = []
-        # self.unk_strings: List[Tuple[UnHashedString, Tuple[int]]] = []
+        self.unk_strings: List[Tuple[UnHashedString, Tuple[int]]] = []
 
     def _get_section_handler(self, magic) -> Type[WWiseSection]:
         return self._sections_handlers.get(magic, GenericBlock)
@@ -64,15 +64,14 @@ class WWiseSound(CoreDummy):
                 data.sub_reader.seek(entry.offset)
                 wav_data = data.sub_reader.read_bytes(entry.size)
                 self.wave_files.append(wav_data)
-        pass
-        # reader.seek(start + self.unk_1)
-        # reader.skip(3 * 4)
-        # str_count = reader.read_uint32()
-        # reader.skip(9)
-        # for _ in range(str_count):
-        #     unhased_string = reader.read_unhashed_string()
-        #     unks = reader.read_fmt('7I')
-        #     self.unk_strings.append((unhased_string, unks))
+
+        reader.skip(5 * 4)
+        str_count = reader.read_uint32()
+        reader.skip(9)
+        for _ in range(str_count):
+            unhased_string = reader.read_unhashed_string()
+            unks = reader.read_fmt('7I')
+            self.unk_strings.append((unhased_string, unks))
 
         # self.bank_header.parse(reader)
 
