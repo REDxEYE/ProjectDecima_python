@@ -17,7 +17,7 @@ class StreamReference:
         from ..archive.archive_array import ArchiveSet
         archive_array: ArchiveSet
         for ref in cls._all_refs:
-            print(f'Loading referenced stream: {ref.stream_path.string}')
+            # print(f'Loading referenced stream: {ref.stream_path.string}')
             stream_path = ref.stream_path.string
             if not stream_path.endswith('.core.stream'):
                 stream_path += '.core.stream'
