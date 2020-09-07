@@ -40,12 +40,12 @@ class ByteIO:
     @property
     def preview(self):
         with self.save_current_pos():
-            return self.read_bytes(64)
+            return self.read_bytes(min(64,self.size()-self.tell()))
 
     @property
     def preview_f(self):
         with self.save_current_pos():
-            block = self.read_bytes(64)
+            block = self.read_bytes(min(64,self.size()-self.tell()))
             hex_values = split(split(binascii.hexlify(block).decode().upper(), 2), 4)
             return [' '.join(b) for b in hex_values]
 
