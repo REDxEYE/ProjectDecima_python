@@ -61,7 +61,7 @@ class VoiceRef(CoreDummy):
         self.voice_lines_localized_ref = EntryReference()
         self.ref_1 = EntryReference()
         self.text_lines_localized_ref = EntryReference()
-        self.speaker_name_localized_ref = EntryReference()  # not sure
+        self.speaker_name_localized_ref = EntryReference()
 
     def parse(self, reader: ByteIODS, core_file):
         self.header.parse(reader)
@@ -78,7 +78,7 @@ class VoiceRef(CoreDummy):
         text: Translation = self.text_lines_localized_ref.ref
         voice: VoiceTranslation = self.voice_lines_localized_ref.ref
         speaker: SpeakerInfo = self.speaker_name_localized_ref.ref
-        if not all([text, voice, speaker, text]):
+        if not all([text, speaker]):
             return
         speaker_translation: Translation = speaker.localized_name.ref
         if not speaker_translation:
@@ -87,11 +87,12 @@ class VoiceRef(CoreDummy):
         output_json = {}
         lang_output_path = output_path / speaker.name.string
         os.makedirs(lang_output_path, exist_ok=True)
+        print(f'Exporting translation {speaker.name.string} to {lang_output_path}')
 
         for lang in language_list:
             localized_speaker = speaker_translation.translations[lang]
             localized_text = text.translations[lang]
-            localized_voice = voice.voices.get(lang, None)
+            localized_voice = voice.voices.get(lang, None) if voice else None
             output_json[lang] = {'speaker_name': localized_speaker.dump(),
                                  'text_line': localized_text.dump(),
                                  'voice_line_name': f'{lang}_{Path(localized_voice.stream_path.string).stem}' if localized_voice else "NO_DATA"}
