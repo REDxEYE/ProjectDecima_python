@@ -55,6 +55,8 @@ class ArchiveManager:
         pass
 
     def parse_all(self):
+        StreamReference.set_archive_manager(self)
+        EntryReference.set_archive_manager(self)
         all_files = list(self.work_dir.rglob('*.bin'))
         self.load_cache()
         self.check_crc(all_files)
@@ -81,7 +83,5 @@ class ArchiveManager:
         archive = self.hash_to_archive.get(hash_string(file_id), None)
         if archive:
             core_file = archive.queue_file(file_id, is_core_file)
-            if is_core_file:
-                StreamReference.resolve(self)
             self.__core_file_cache[file_id] = core_file
             return core_file

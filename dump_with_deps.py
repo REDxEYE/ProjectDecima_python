@@ -68,6 +68,4 @@ if __name__ == '__main__':
         if not core_file_path:
             break
         file = ar_set.queue_file(core_file_path)
-        StreamReference.resolve(ar_set)
-        EntryReference.resolve(ar_set)
         dump_core_file(dump_dir, file)

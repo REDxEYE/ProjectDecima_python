@@ -50,8 +50,6 @@ def test_archive_set():
         for file in Path(file).rglob('*.core'):
             core_file = CoreFile(file)
             core_file.parse()
-            EntryReference.resolve(arch_set)
-            StreamReference.resolve(arch_set)
             for ent in core_file.entries:
                 if ent.header.magic == 0xA664164D69FD2B38:
                     ent.export(r"F:\SteamLibrary\steamapps\common\Death Stranding\dump")
@@ -68,10 +66,6 @@ def test_archive_set():
     else:
         core_file = CoreFile(file)
         core_file.parse()
-        EntryReference.resolve(arch_set)
-        while EntryReference.dirty:
-            EntryReference.resolve(arch_set)
-        StreamReference.resolve(arch_set)
         pass
 
 
