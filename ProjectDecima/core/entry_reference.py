@@ -16,34 +16,15 @@ class LoadMethod(IntEnum):
 
 
 class EntryReference:
-    _global_refs: List['EntryReference'] = []
-    dirty = False
+    _archive_manager = None
 
     @classmethod
-    def register_global_ref(cls, self):
-        cls._global_refs.append(self)
-        cls.dirty = True
-
-    @classmethod
-    def resolve(cls, archive_array):
-        from .core_file import CoreFile
-        from ..archive.archive_manager import ArchiveManager
-        core_file: CoreFile
-        archive_array: ArchiveManager
-        cls.dirty = False
-
-        for ref in cls._global_refs.copy():
-            if ref.guid.int == 0:
-                cls._global_refs.remove(ref)
-                continue
-            if ref.load_method in [LoadMethod.ImmediateCoreFile, LoadMethod.CoreFile]:
-                print(f'Loading referenced core file: {ref._file_ref}')
-                core = archive_array.queue_file(ref._file_ref, True)
-                ref.ref = core.get_by_guid(ref.guid)
-                ref._core_file = core
-            if ref.ref:
-                cls._global_refs.remove(ref)
-        pass
+    def set_archive_manager(cls, manager):
+        """Setter for **ArchiveManager** instance
+        :param manager: Instance of ArchiveManager
+        Should be called before any core file parsing
+        """
+        cls._archive_manager = manager
 
     def __init__(self):
         self.load_method = LoadMethod(0)
@@ -67,5 +48,11 @@ class EntryReference:
 
         if self.load_method == LoadMethod.Embedded:
             core_file.local_links.append(self)
-        elif self.load_method in [LoadMethod.ImmediateCoreFile, LoadMethod.CoreFile]:
-            self.register_global_ref(self)
+        if self._archive_manager:
+            if self.load_method in [LoadMethod.ImmediateCoreFile, LoadMethod.CoreFile]:
+                print(f'Loading referenced core file: {self._file_ref}')
+                core = self._archive_manager.queue_file(self._file_ref, True)
+                self.ref = core.get_by_guid(self.guid)
+                self._core_file = core
+        else:
+            raise Exception('No archive manager instance were provided')
