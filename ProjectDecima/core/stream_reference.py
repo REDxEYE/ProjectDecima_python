@@ -44,7 +44,8 @@ class StreamReference:
             if not stream_path.endswith('.core.stream'):
                 stream_path += '.core.stream'
             self.stream_reader = ByteIODS(self._archive_manager.queue_file(stream_path, False))
-        # self.register_ref(self)
+        else:
+            raise Exception('No archive manager instance were provided')
 
     def __bool__(self):
         return self.stream_reader.size() != 0
