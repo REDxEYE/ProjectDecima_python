@@ -5,7 +5,7 @@ from pathlib import Path
 from struct import pack
 from typing import List, Tuple
 
-from ProjectDecima import ArchiveSet, Archive
+from ProjectDecima import ArchiveManager, Archive
 from ProjectDecima.utils.decryption import hash_string, decrypt_chunk_data
 from ProjectDecima.archive.archive import ArchiveEntry, ArchiveChunk, ArchiveVersion, ArchiveHeader
 from ProjectDecima.utils.oodle_wrapper import Oodle

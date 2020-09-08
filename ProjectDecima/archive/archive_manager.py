@@ -8,7 +8,7 @@ from ..core.stream_reference import StreamReference
 from ..utils.decryption import hash_string
 
 
-class ArchiveSet:
+class ArchiveManager:
     __core_file_cache: Dict[int, 'CoreFile'] = {}
 
     def __init__(self, work_dir):

@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from ProjectDecima.archive.archive_array import ArchiveSet
+from ProjectDecima.archive.archive_manager import ArchiveManager
 from ProjectDecima.core.entry_reference import EntryReference
 from ProjectDecima.core.stream_reference import StreamReference
 from ProjectDecima.core.core_file import CoreFile
@@ -39,7 +39,7 @@ def test_archives():
 
 def test_archive_set():
     work_dir = r"F:\SteamLibrary\steamapps\common\Death Stranding\data"
-    arch_set = ArchiveSet(work_dir)
+    arch_set = ArchiveManager(work_dir)
     arch_set.parse_all()
 
     file = Path(

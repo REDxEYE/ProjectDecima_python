@@ -6,7 +6,12 @@ from .pod.strings import UnHashedString
 
 
 class StreamReference:
+    _archive_manager = None
     _all_refs: List['StreamReference'] = []
+
+    @classmethod
+    def set_archive_manager(cls, manager):
+        cls._archive_manager = manager
 
     @classmethod
     def register_ref(cls, self):
@@ -14,10 +19,9 @@ class StreamReference:
 
     @classmethod
     def resolve(cls, archive_array):
-        from ..archive.archive_array import ArchiveSet
-        archive_array: ArchiveSet
+        from ..archive.archive_manager import ArchiveManager
+        archive_array: ArchiveManager
         for ref in cls._all_refs:
-            # print(f'Loading referenced stream: {ref.stream_path.string}')
             stream_path = ref.stream_path.string
             if not stream_path.endswith('.core.stream'):
                 stream_path += '.core.stream'
@@ -35,7 +39,12 @@ class StreamReference:
         self.stream_path = reader.read_unhashed_string()
         self.mempool_tag = reader.read_guid()
         self.unk_0, self.offset, self.size = reader.read_fmt('3I')
-        self.register_ref(self)
+        if self._archive_manager is not None:
+            stream_path = self.stream_path
+            if not stream_path.endswith('.core.stream'):
+                stream_path += '.core.stream'
+            self.stream_reader = ByteIODS(self._archive_manager.queue_file(stream_path, False))
+        # self.register_ref(self)
 
     def __bool__(self):
         return self.stream_reader.size() != 0

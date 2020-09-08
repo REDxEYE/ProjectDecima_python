@@ -1,11 +1,11 @@
 from struct import pack
 
-from ProjectDecima import ArchiveSet, Archive
+from ProjectDecima import ArchiveManager, Archive
 from ProjectDecima.utils.decryption import hash_string, decrypt_chunk_data
 from ProjectDecima.archive.archive import ArchiveEntry, ArchiveChunk
 from ProjectDecima.utils.oodle_wrapper import Oodle
 
-ar_set = ArchiveSet(r'F:\SteamLibrary\steamapps\common\Death Stranding\data')
+ar_set = ArchiveManager(r'F:\SteamLibrary\steamapps\common\Death Stranding\data')
 ar_set.parse_all()
 file_to_dump = 'interface/textures/ds/image_display/ut_ui_m00650_title.core'
 file_hash = hash_string(file_to_dump)

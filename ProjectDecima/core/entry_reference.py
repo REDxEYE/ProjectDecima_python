@@ -27,9 +27,9 @@ class EntryReference:
     @classmethod
     def resolve(cls, archive_array):
         from .core_file import CoreFile
-        from ..archive.archive_array import ArchiveSet
+        from ..archive.archive_manager import ArchiveManager
         core_file: CoreFile
-        archive_array: ArchiveSet
+        archive_array: ArchiveManager
         cls.dirty = False
 
         for ref in cls._global_refs.copy():

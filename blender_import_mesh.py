@@ -5,7 +5,7 @@ from pathlib import Path
 cur_path = Path(__file__).parent
 sys.path.append(cur_path)
 
-from ProjectDecima.archive.archive_array import ArchiveSet
+from ProjectDecima.archive.archive_manager import ArchiveManager
 from ProjectDecima.core.entry_reference import EntryReference
 from ProjectDecima.core.entry_types import *
 from ProjectDecima.core.stream_reference import StreamReference
@@ -14,7 +14,7 @@ import numpy as np
 vertex_dtype = np.dtype([('pos', np.float32, (3,)), ('bone_ids', np.uint8, (8,)), ('weights', np.uint8, (8,))])
 
 
-def handle_model(model: CoreModel, ar_set: ArchiveSet):
+def handle_model(model: CoreModel, ar_set: ArchiveManager):
     mesh_stream = model.mesh_stream.stream_reader
 
     def pad_offset(block_size):
@@ -46,7 +46,7 @@ archive_dir = Path(input('Folder with archives: ') or r'F:\SteamLibrary\steamapp
 print(f'Loading archives from "{archive_dir}"')
 dump_dir = Path(input('Output path: ') or r'F:\SteamLibrary\steamapps\common\Death Stranding\dump')
 print(f'Dumping files to "{archive_dir}"')
-ar_set = ArchiveSet(archive_dir)
+ar_set = ArchiveManager(archive_dir)
 ar_set.parse_all()
 
 mesh_path = input("Mesh path:")

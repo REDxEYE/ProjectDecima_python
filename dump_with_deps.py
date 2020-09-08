@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import List
 
-from ProjectDecima import ArchiveSet, CoreFile, Archive
+from ProjectDecima import ArchiveManager, CoreFile, Archive
 from ProjectDecima.core.entry_reference import EntryReference, LoadMethod
 from ProjectDecima.core.stream_reference import StreamReference
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     print(f'Loading archives from "{archive_dir}"')
     dump_dir = Path(input('Output path: ') or r'F:\SteamLibrary\steamapps\common\Death Stranding\dump')
     print(f'Dumping files to "{archive_dir}"')
-    ar_set = ArchiveSet(archive_dir)
+    ar_set = ArchiveManager(archive_dir)
     ar_set.parse_all()
 
     while 1:
