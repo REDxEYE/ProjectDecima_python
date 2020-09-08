@@ -10,6 +10,10 @@ class StreamReference:
 
     @classmethod
     def set_archive_manager(cls, manager):
+        """Setter for **ArchiveManager** instance
+        :param manager: Instance of ArchiveManager
+        Should be called before any core file parsing
+        """
         cls._archive_manager = manager
 
     def __init__(self):
