@@ -1,3 +1,4 @@
+from typing import List
 from uuid import UUID
 
 from . import CoreDummy
@@ -93,21 +94,42 @@ class MeshInfo(CoreDummy):
 EntryTypeManager.register_handler(MeshInfo)
 
 
+class VertexBlockInfo:
+    def __init__(self):
+        self.unk_0 = 0
+        self.stride = 0
+        self.element_count = 0
+        self.unk_3 = 0
+        self.unk_4 = []
+        self.unk_data = []
+
+    def parse(self, reader: ByteIODS):
+        self.unk_0, self.stride, self.element_count, self.unk_3 = reader.read_fmt('4I')
+        self.unk_4 = reader.read_fmt('3I')
+        for _ in range(self.element_count):
+            self.unk_data.append(reader.read_uint32())
+
+
 class Vertices(CoreDummy):
     magic = 0x3AC29A123FAABAB4
 
     def __init__(self):
         super().__init__()
         self.vertex_count = 0
-        self.unks_0 = []
-        # self.guid_0 = EntryReference()
+        self.block_count = 0
+        self.unk_1 = 1
+        self.vertex_infos: List[VertexBlockInfo] = []
 
     def parse(self, reader: ByteIODS, core_file):
         self.header.parse(reader)
         self.guid = reader.read_guid()
         self.vertex_count = reader.read_uint32()
-        self.unks_0 = reader.read_fmt(f'={72 // 4}I')
-        # self.guid_0.parse(reader, core_file)
+        self.block_count = reader.read_uint32()
+        self.unk_1 = reader.read_uint8()
+        for _ in range(self.block_count):
+            vertex_block_info = VertexBlockInfo()
+            vertex_block_info.parse(reader)
+            self.vertex_infos.append(vertex_block_info)
 
 
 EntryTypeManager.register_handler(Vertices)
