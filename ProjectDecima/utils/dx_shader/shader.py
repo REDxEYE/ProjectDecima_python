@@ -135,7 +135,10 @@ class ISGNElement:
         reader.skip(2)
 
     def __repr__(self):
-        return f'<Element "{self.name}":{self.component_type.name} {str(self.mask)} type:{self.system_value_type.name} register:{self.register_index} semantic:{self.semantic_index}>'
+        return f'<Element "{self.name}":{self.component_type.name} {str(self.mask)} ' \
+               f'type:{self.system_value_type.name} ' \
+               f'register:{self.register_index} ' \
+               f'semantic:{self.semantic_index}>'
 
 
 class ISGN(DXChunk):
