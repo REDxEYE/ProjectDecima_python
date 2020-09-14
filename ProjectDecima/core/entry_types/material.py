@@ -111,4 +111,4 @@ class Material(CoreDummy):
             self.entries.append(entry)
 
 
-# EntryTypeManager.register_handler(Material)
+EntryTypeManager.register_handler(Material)
