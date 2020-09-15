@@ -101,7 +101,7 @@ class VoiceRef(CoreDummy):
             localized_voice = voice.voices.get(lang, None) if voice else None
             output_json[lang] = {'speaker_name': localized_speaker.dump(),
                                  'text_line': localized_text.dump(),
-                                 'voice_line_name': f'{lang}_{Path(localized_voice.stream_path).stem}' if localized_voice else "NO_DATA"}
+                                 'voice_line_name': f'{lang}_{Path(localized_voice.stream_path).stem}' if localized_voice else "<empty>"}
             if localized_voice:
                 with (lang_output_path / f'{lang}_{Path(localized_voice.stream_path).stem}').open('wb') as f:
                     f.write(localized_voice.stream_reader.read_bytes(-1))
