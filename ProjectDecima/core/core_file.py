@@ -29,6 +29,7 @@ class CoreFile:
             self.filepath = Path(filepath)
             self.reader = ByteIODS(filepath)
         self.entries: List[CoreDummy] = []
+        self._entry_by_guid: Dict[UUID, CoreDummy] = {}
         self.local_links: List[EntryReference] = []
 
     def get_entries_by_type(self, entry_type):
@@ -40,16 +41,13 @@ class CoreFile:
 
     def parse(self):
         while self.reader:
-            core_entry = EntryTypeManager.handle(self.reader, self)
+            core_entry: CoreDummy = EntryTypeManager.handle(self.reader, self)
+            self._entry_by_guid[core_entry.guid] = core_entry
             self.entries.append(core_entry)
         self.resolve_local_links()
 
     def get_by_guid(self, guid: UUID):
-        for entry in self.entries:
-            entry: CoreDummy
-            if entry.guid.int == guid.int:
-                return entry
-        return None
+        return self._entry_by_guid.get(guid, None)
 
     def resolve_local_links(self):
         for local_link in self.local_links.copy():
