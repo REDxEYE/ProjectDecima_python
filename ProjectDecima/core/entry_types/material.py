@@ -4,9 +4,7 @@ from uuid import UUID
 
 from . import CoreDummy
 from ..core_entry_handler_manager import EntryTypeManager
-from ...core.stream_reference import StreamReference
 from ..entry_reference import EntryReference
-from ...utils.byte_io import ByteIO
 from ...utils.byte_io_ds import ByteIODS
 
 
@@ -17,8 +15,6 @@ class MatVar:
 
     def parse(self, reader: ByteIODS, core_file):
         self.ref.parse(reader, core_file)
-        tmp = reader.peek_fmt('I2H')
-        print(tmp)
         type_magic = reader.read_uint64()
 
         if type_magic in [1131449004589570, 2257898667246082, 10139198015144450, 11265097921987074, 1131998760403458,
@@ -29,17 +25,13 @@ class MatVar:
                           16894597456200194, 3383798574088706, 5635598387773954, 6761498294616578, 4509698480931330,
                           21398197083570690, 19146397269885442, 10141946794213890, 4512447260000770, 5638347166843394,
                           1132548516217346]:
-            print('6I\n')
             self.data = reader.read_fmt('6I')
         elif type_magic in [5549097746946, 6648609374722]:
-            print("4I4f16I\n")
             reader.skip(12)
             self.data = reader.read_fmt(f'4f{52 // 4}I')
         elif type_magic in [23649996897255938, 6764247073686018]:
-            print("QN->4fQHIBBH\n")
             reader.skip(8)
             count = reader.read_uint32()
-            # reader.skip(16)
             for _ in range(count):
                 self.data.append(reader.read_fmt(f'<4fQHIBBH'))
 
@@ -64,9 +56,7 @@ class MatEntry:
         self.shader_ref = EntryReference()
 
     def parse(self, reader: ByteIODS, core_file):
-        print(reader._peek(28))
         self.unks_0 = reader.read_fmt(f'{28 // 4}I')
-        print(self.unks_0)
         unk_count = reader.read_uint32()
         self.unk_shorts_1 = reader.read_fmt(f'{unk_count}H')
         unk_block_count = reader.read_uint32()
