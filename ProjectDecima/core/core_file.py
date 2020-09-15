@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Dict
 from uuid import UUID
 
 from .core_entry_handler_manager import EntryTypeManager
