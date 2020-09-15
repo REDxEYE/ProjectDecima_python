@@ -103,6 +103,7 @@ class VoiceRef(CoreDummy):
                                  'text_line': localized_text.dump(),
                                  'voice_line_name': f'{lang}_{Path(localized_voice.stream_path).stem}' if localized_voice else "<empty>"}
             if localized_voice:
+                localized_voice.stream_reader.seek(0)
                 with (lang_output_path / f'{lang}_{Path(localized_voice.stream_path).stem}').open('wb') as f:
                     f.write(localized_voice.stream_reader.read_bytes(-1))
         with (lang_output_path / f'translation_info_{self.guid}.json').open('w', encoding='utf-8') as f:
