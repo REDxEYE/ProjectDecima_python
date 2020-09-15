@@ -19,10 +19,6 @@ def main():
         if not core_file_path:
             break
         file = ar_set.queue_file(core_file_path, True)
-        EntryReference.resolve(ar_set)
-        while EntryReference.dirty:
-            EntryReference.resolve(ar_set)
-        StreamReference.resolve(ar_set)
         os.makedirs((dump_dir / Path(core_file_path).with_suffix('')), exist_ok=True)
         file_dump_path = dump_dir / Path(core_file_path).with_suffix('')
         for entry in file.entries:
