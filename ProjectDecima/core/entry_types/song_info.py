@@ -51,7 +51,7 @@ class SongInfo(CoreDummy):
     def __init__(self):
         super().__init__()
         self.unk_0 = 0
-        self.song_name = EntryReference()
+        self.artist_name_2 = EntryReference()
         self.artist_name = EntryReference()
         self.copyrights = EntryReference()
         self.additional_info = EntryReference()
@@ -62,7 +62,7 @@ class SongInfo(CoreDummy):
         self.header.parse(reader)
         self.guid = reader.read_guid()
         self.unk_0 = reader.read_uint16()
-        self.song_name.parse(reader, core_file)
+        self.artist_name_2.parse(reader, core_file)
         self.artist_name.parse(reader, core_file)
         self.copyrights.parse(reader, core_file)
         self.additional_info.parse(reader, core_file)
