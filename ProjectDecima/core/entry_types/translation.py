@@ -185,3 +185,73 @@ class Translation(CoreDummy):
 
 
 EntryTypeManager.register_handler(Translation)
+
+
+class UnkData(CoreDummy):
+    magic = 0x257040983B11DA11
+
+    def __init__(self):
+        super().__init__()
+        self.unk_0 = []
+
+    def parse(self, reader: ByteIODS, core_file):
+        self.header.parse(reader)
+        self.unk_0 = reader.read_fmt('BBI')
+        self.guid = reader.read_guid()
+
+
+EntryTypeManager.register_handler(UnkData)
+
+
+class UnkData0(CoreDummy):
+    magic = 0x1D68E0C914AB952E
+
+    def __init__(self):
+        super().__init__()
+        self.unk_0 = 0
+        self.unk_1_count = 0
+        self.refs: List[EntryReference] = []
+
+    def parse(self, reader: ByteIODS, core_file):
+        self.header.parse(reader)
+        self.guid = reader.read_guid()
+        self.unk_0 = reader.read_uint32()
+        self.unk_1_count = reader.read_uint32()
+        for _ in range(self.unk_1_count):
+            ref = EntryReference()
+            ref.parse(reader, core_file)
+            self.refs.append(ref)
+
+
+EntryTypeManager.register_handler(UnkData0)
+
+
+class UnkData1(CoreDummy):
+    magic = 0x39A4A2EC923B67E8
+
+    def __init__(self):
+        super().__init__()
+        self.skeleton_ref = EntryReference()
+        self.data_size = 0
+        self.data = []
+        self.unk_0 = []
+        self.unk_1 = 0
+        self.unk_2 = []
+        self.unk_3 = 0.0
+        self.unk_4 = []
+        self.unk_5 = 0
+
+    def parse(self, reader: ByteIODS, core_file):
+        self.header.parse(reader)
+        self.guid = reader.read_guid()
+        self.skeleton_ref.parse(reader, core_file)
+        self.data_size = reader.read_uint32()
+        self.unk_0 = reader.read_fmt('2f')
+        self.unk_1 = reader.read_uint32()
+        self.unk_2 = reader.read_fmt('3I')
+        self.unk_3 = reader.read_float()
+        self.unk_4 = reader.read_fmt('4I')
+        self.unk_4 = reader.read_uint8()
+
+
+EntryTypeManager.register_handler(UnkData1)
