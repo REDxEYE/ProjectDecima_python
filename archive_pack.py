@@ -56,7 +56,7 @@ class ArchivePacker:
             print('\n')
         print(f'Created temporary buffer')
 
-    def create_chunks2(self):
+    def create_chunks(self):
         print('Creating chunks')
         total_data_size = sum([v[1] for v in self.files])
         estimated_chunk_count = math.ceil(total_data_size / self._chunk_max_size)
@@ -96,9 +96,8 @@ class ArchivePacker:
                     chunk_buffer = chunk_buffer[self._chunk_max_size:]
                     uncompressed_offset = create_chunk(chunk_data, compressed_buffer, uncompressed_offset)
                     local_chunk_count += 1
-                    print(
-                        f'\rCompressing {file.stem} file {local_chunk_count}/{per_file_chunk_count}. Total progress {len(self.chunks)}/{estimated_chunk_count}',
-                        end='')
+                    print(f'\rCompressing {file.stem} file {local_chunk_count}/{per_file_chunk_count}.'
+                          f' Total progress {len(self.chunks)}/{estimated_chunk_count}', end='')
             create_chunk(chunk_buffer, compressed_buffer, uncompressed_offset)
             # print(f'\rCompressing {i + 1}/{entry_count} files', end='')
             print('\nCompressed all files!')
@@ -174,7 +173,7 @@ if __name__ == '__main__':
     a.collect_files()
     a.create_entries()
     # a.dump_to_temp_file()
-    a.create_chunks2()
+    a.create_chunks()
     a.write_archive()
     a.finish()
     pass
