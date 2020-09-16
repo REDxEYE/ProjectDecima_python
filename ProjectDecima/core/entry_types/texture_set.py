@@ -18,7 +18,7 @@ class TSEntry:
         self.ref = EntryReference()
 
     def parse(self, reader: ByteIODS, core_file):
-        self.unk_0, self.unk_1, self.unk_2, self.unk_3, self.unk_4 = reader.read_fmt('4IB')
+        self.unk_0, self.unk_1, self.unk_2, self.unk_3, self.unk_4 = reader.read_fmt('IIIIB')
         self.ref.parse(reader, core_file)
 
 
@@ -27,22 +27,24 @@ class SrcEntry:
         self.slot_id = 0
         self.src_name = HashedString()
         self.unk_0 = 0
-        self.unks_1 = []
+        self.unk_1 = 0
+        self.unk_2 = 0
+        self.unk_3 = 0
         # self.unk_pad = 0
         self.width = 0
         self.height = 0
-        self.unks_2 = []
+        self.unks_5 = []
 
     def parse(self, reader: ByteIODS):
         self.slot_id = reader.read_uint32()
         self.src_name = reader.read_hashed_string()
         self.unk_0 = reader.read_uint16()
-        self.unks_1 = reader.read_fmt('3I')
+        self.unk_1, self.unk_2, self.unk_3 = reader.read_fmt('3I')
         if self.unk_0 == 0:
             self.unk_pad = reader.read_uint32()
         else:
             self.width, self.height = reader.read_fmt('2I')
-        self.unks_2 = reader.read_fmt('4f')
+        self.unks_5 = reader.read_fmt('4f')
 
 
 class TextureSet(CoreDummy):
