@@ -1,7 +1,7 @@
 from .dummy import CoreDummy, CoreDummy_60, CoreDummy_4
 from .song_info import UnkSongBlock, SongInfo, UnkBlock, UnkBlock2
 from .entity import EntityModelInfo, EntityMeshInfo
-from .material import Material
+from .material import Material, MaterialReference
 from .system.audio_system import AudioUnk, ControlName, AudioUnk3, AudioUnk4
 from .system.group_settings import Settings
 from .texture import Texture
@@ -11,7 +11,7 @@ from .armature import Armature, ArmatureReference
 from .bone_data import CoreBoneData
 from .texture_set import TextureSet
 from .translation import Translation, VoiceRef, VoiceTranslation, SpeakerInfo
-from .unk_entry import BoneRelatedEntry, MaterialReference, UnkEntry, UnkEntry2
+from .unk_entry import BoneRelatedEntry, UnkEntry, UnkEntry2
 from .sound_bank import SoundDesc, WWiseSound
 from .collection import CoreRefCollection
 from .unk_model_entry import UnkModelEntry, UnkModelEntry2
