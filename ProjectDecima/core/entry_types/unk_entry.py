@@ -77,20 +77,3 @@ class UnkEntry2(CoreDummy):
 
 EntryTypeManager.register_handler(UnkEntry2)
 
-
-class MaterialReference(CoreDummy):
-    magic = 0xFE2843D4AAD255E7
-
-    def __init__(self, ):
-        super().__init__()
-        self.guid_0 = EntryReference()
-        self.unk_0 = 0
-
-    def parse(self, reader: ByteIODS, core_file):
-        self.header.parse(reader)
-        self.guid = reader.read_guid()
-        self.guid_0.parse(reader, core_file)
-        self.unk_0 = reader.read_uint8()
-
-
-EntryTypeManager.register_handler(MaterialReference)
