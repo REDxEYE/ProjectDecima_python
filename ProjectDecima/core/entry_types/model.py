@@ -13,16 +13,22 @@ class CoreModel(CoreDummy):
     def __init__(self):
         super().__init__()
 
-        self.unk: List[int] = []
-        self.unk1 = 0
-        self.armature_reference = EntryReference()
-        self.bone_data_ref = EntryReference()
-        self.unk_entry_ref = EntryReference()
-        self.floats = []
-        self.vertex_data_info_ref = EntryReference()
-        self.mesh_info_ref = []
-        self.materials = []
-        self.mesh_stream = StreamReference()
+        self.static_data_block_size = 0
+        self.bbox = []
+        self.cull_info = 0
+        self.mesh_hierarchy_info = MeshHierarchyInfo()
+        self.skeleton = EntryReference()
+        self.orientation_helpers = EntryReference()
+        self.deformer_type = ESkinningDeformerType.DeformPosAndNormals
+        self.skinned_mesh_joints_bindings = EntryReference()
+        self.skinned_mesh_bone_bboxes = EntryReference()
+        self.position_bounds_scale = []
+        self.position_bounds_offset = []
+        self.skin_info = EntryReference()
+        self.primitives = []
+        self.shading_groups = []
+        self.render_effect_swapper = EntryReference()
+        self.mesh_stream = StreamingDataSource()
 
     def parse(self, reader: ByteIODS, core_file):
         self.header.parse(reader)

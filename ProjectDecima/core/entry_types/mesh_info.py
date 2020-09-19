@@ -3,7 +3,7 @@ from uuid import UUID
 
 from . import CoreDummy
 from ..core_entry_handler_manager import EntryTypeManager
-from ..stream_reference import StreamReference
+from ..stream_reference import StreamingDataSource
 from ...utils.byte_io_ds import ByteIODS
 from ..entry_reference import EntryReference
 
@@ -58,7 +58,7 @@ class MeshStreamInfo(CoreDummy):
     def __init__(self):
         super().__init__()
         self.unks_0 = []
-        self.mesh_stream = StreamReference()
+        self.mesh_stream = StreamingDataSource()
 
     def parse(self, reader: ByteIODS, core_file):
         self.header.parse(reader)

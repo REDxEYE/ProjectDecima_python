@@ -4,7 +4,7 @@ from uuid import UUID
 
 from . import CoreDummy
 from ..core_entry_handler_manager import EntryTypeManager
-from ...core.stream_reference import StreamReference
+from ...core.stream_reference import StreamingDataSource
 from ...utils.byte_io_ds import ByteIODS
 
 
@@ -46,7 +46,7 @@ class Texture(CoreDummy):
         self.stream_mips = 0
         self.unk_3 = 0
         self.unk_4 = 0
-        self.stream = StreamReference()
+        self.stream = StreamingDataSource()
         self.data_buffer = b''
 
     def parse(self, reader: ByteIODS, core_file):

@@ -8,7 +8,7 @@ from . import CoreDummy
 from ..core_entry_handler_manager import EntryTypeManager
 from ..entry_reference import EntryReference
 from ..pod.strings import HashedString
-from ..stream_reference import StreamReference
+from ..stream_reference import StreamingDataSource
 from ...utils.byte_io_ds import ByteIODS
 
 language_list = ["English",
@@ -123,7 +123,7 @@ class VoiceTranslation(CoreDummy):
         self.sentence_id = HashedString()
         self.sound_group_settings_ref = EntryReference()
         self.wwise_localized_sound_presets_ref = EntryReference()
-        self.voices: Dict[str, StreamReference] = {}
+        self.voices: Dict[str, StreamingDataSource] = {}
 
     def parse(self, reader: ByteIODS, core_file):
         self.header.parse(reader)
@@ -135,7 +135,7 @@ class VoiceTranslation(CoreDummy):
         unk_count = reader.read_uint32()
         reader.skip(240)
         while reader:
-            stream_ref = StreamReference()
+            stream_ref = StreamingDataSource()
             stream_ref.parse(reader)
             lang = stream_ref.stream_path.split('.')[-1].capitalize()
             if lang == 'Chinese':
