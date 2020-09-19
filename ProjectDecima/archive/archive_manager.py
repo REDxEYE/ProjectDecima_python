@@ -4,7 +4,7 @@ from typing import List, Union, Dict, Set
 
 from .archive import Archive
 from ..core.entry_reference import EntryReference
-from ..core.stream_reference import StreamReference
+from ..core.stream_reference import StreamingDataSource
 from ..utils.decryption import hash_string
 
 
@@ -55,7 +55,7 @@ class ArchiveManager:
         pass
 
     def parse_all(self):
-        StreamReference.set_archive_manager(self)
+        StreamingDataSource.set_archive_manager(self)
         EntryReference.set_archive_manager(self)
         all_files = list(self.work_dir.rglob('*.bin'))
         self.load_cache()

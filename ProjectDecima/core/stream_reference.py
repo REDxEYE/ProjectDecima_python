@@ -5,7 +5,7 @@ from ..utils.byte_io_ds import ByteIODS
 from .pod.strings import UnHashedString
 
 
-class StreamReference:
+class StreamingDataSource:
     _archive_manager = None
 
     @classmethod
@@ -19,7 +19,7 @@ class StreamReference:
     def __init__(self):
         self.stream_path = UnHashedString()
         self.mempool_tag = UUID(int=0)
-        self.unk_0 = 0
+        self.channel = 0
         self.offset = 0
         self.size = 0
         self.stream_reader: ByteIODS = ByteIODS()
@@ -27,7 +27,7 @@ class StreamReference:
     def parse(self, reader: ByteIODS):
         self.stream_path = reader.read_unhashed_string()
         self.mempool_tag = reader.read_guid()
-        self.unk_0, self.offset, self.size = reader.read_fmt('3I')
+        self.channel, self.offset, self.size = reader.read_fmt('3I')
         if self._archive_manager is not None:
             stream_path = self.stream_path
             if not stream_path.endswith('.core.stream'):

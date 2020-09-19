@@ -29,6 +29,9 @@ class ShaderEntry:
         size = reader.read_uint32()
         shader_reader = ByteIO(reader.read_bytes(size))
         self.shader.parse(shader_reader)
+        for e in self.shader.chunks[1].elements:
+            print(e)
+        print('\n\n')
         return self
 
 

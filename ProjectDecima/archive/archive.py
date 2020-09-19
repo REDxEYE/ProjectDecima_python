@@ -8,7 +8,7 @@ from typing import List, Dict, Union, BinaryIO
 import numpy as np
 
 from ..core.entry_reference import EntryReference
-from ..core.stream_reference import StreamReference
+from ..core.stream_reference import StreamingDataSource
 from ..utils.byte_io_ds import ByteIODS
 from ..constants import encryption_key_1
 from ..core.core_file import CoreFile

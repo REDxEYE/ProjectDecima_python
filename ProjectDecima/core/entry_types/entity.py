@@ -3,7 +3,7 @@ from uuid import UUID
 
 from . import CoreDummy
 from ..core_entry_handler_manager import EntryTypeManager
-from ...core.stream_reference import StreamReference
+from ...core.stream_reference import StreamingDataSource
 from ..entry_reference import EntryReference
 from ...utils.byte_io_ds import ByteIODS
 
