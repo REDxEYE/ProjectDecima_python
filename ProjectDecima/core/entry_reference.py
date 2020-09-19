@@ -3,7 +3,7 @@ from uuid import UUID
 from enum import IntEnum
 
 from .pod.strings import HashedString
-from .stream_reference import StreamReference
+from .stream_reference import StreamingDataSource
 from ..utils.byte_io_ds import ByteIODS
 
 
