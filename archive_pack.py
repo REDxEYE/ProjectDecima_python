@@ -43,6 +43,7 @@ class ArchivePacker:
             entry.key_1 = ((entry.entry_id * entry.hash) ^ 0xAEBECEDE) & 0xFFFFFFFF
             self.entries.append((entry, file))
             pass
+        self.entries.sort(key=lambda a: a[0].hash)
         print(f'Created {len(self.entries)} file entries')
 
     def dump_to_temp_file(self):
@@ -143,7 +144,6 @@ if __name__ == '__main__':
                       '7017f9bb9d52fc1c4433599203cc51b1', False)
     a.collect_files()
     a.create_entries()
-    # a.dump_to_temp_file()
     a.create_chunks()
     a.write_archive()
     a.finish()
