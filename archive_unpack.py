@@ -18,9 +18,9 @@ def dump_archive(archive_path: str, dump_path: str):
     os.makedirs(archive_dump_path, exist_ok=True)
     total = len(archive.entries)
     for n, entry in enumerate(archive.entries):
-        print(f"Writing {n + 1}/{total} {entry.entry_id}-{entry.hash}.bin file")
+        print(f"Writing {n + 1}/{total} {entry.hash}.bin file")
         data = archive.get_file_data(entry)
-        with open(archive_dump_path / f'{entry.entry_id}-{entry.hash}.bin', 'wb') as f:
+        with open(archive_dump_path / f'{entry.hash}.bin', 'wb') as f:
             f.write(data)
 
 

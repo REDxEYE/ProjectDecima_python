@@ -34,9 +34,10 @@ class ArchivePacker:
 
     def create_entries(self):
         print('Creating file entries')
-        for file, file_size in self.files:
+        for entry_id, (file, file_size) in enumerate(self.files):
             entry = ArchiveEntry()
-            entry.entry_id, entry.hash = [int(v) for v in file.stem.split('-')]
+            entry.entry_id = entry_id
+            entry.hash = int(file.stem)
             entry.size = file_size
             entry.key_0 = ((entry.entry_id * entry.hash) ^ 0xFEEEDECE) & 0xFFFFFFFF
             entry.key_1 = ((entry.entry_id * entry.hash) ^ 0xAEBECEDE) & 0xFFFFFFFF
@@ -100,37 +101,7 @@ class ArchivePacker:
                           f' Total progress {len(self.chunks)}/{estimated_chunk_count}', end='')
             create_chunk(chunk_buffer, compressed_buffer, uncompressed_offset)
             # print(f'\rCompressing {i + 1}/{entry_count} files', end='')
-            print('\nCompressed all files!')
-
-    #
-    # def create_chunks(self):
-    #     print('Creating chunks')
-    #     total_data_size = sum([v[1] for v in self.files])
-    #     estimated_chunk_count = math.ceil(total_data_size / self._chunk_max_size)
-    #     chunk_data_start_offset = len(self.entries) * 32 + estimated_chunk_count * 32 + 32 + 8
-    #     with self._compressed_chunk_buffer_path.open('wb') as compressed_buffer:
-    #         with self._raw_chunk_buffer_path.open('rb') as raw_buffer:
-    #             for i in range(estimated_chunk_count):
-    #                 print(f'\rCompressing {i + 1}/{estimated_chunk_count} chunk', end='')
-    #                 chunk = ArchiveChunk()
-    #                 chunk.uncompressed_offset = raw_buffer.tell()
-    #                 raw_data = raw_buffer.read(self._chunk_max_size)
-    #                 chunk.uncompressed_size = len(raw_data)
-    #
-    #                 compressed_data = Oodle.compress(raw_data)
-    #                 chunk.compressed_size = len(compressed_data)
-    #                 chunk.compressed_offset = chunk_data_start_offset + compressed_buffer.tell()
-    #
-    #                 chunk.key_0 = (chunk.uncompressed_size ^ chunk.uncompressed_offset) & 0xFFFFFFFF
-    #                 chunk.key_1 = (chunk.compressed_size ^ chunk.compressed_offset) & 0xFFFFFFFF
-    #
-    #                 if self._encrypt:
-    #                     compressed_data = self._encrypt_chunk(chunk, compressed_data)
-    #                 compressed_buffer.write(compressed_data)
-    #
-    #                 self.chunks.append(chunk)
-    #             print('\n')
-    #     print(f'Created {estimated_chunk_count} chunks')
+            print('\nCompressed')
 
     def _encrypt_chunk(self, chunk: ArchiveChunk, chunk_data: bytes):
         key = pack('Q2I', chunk.uncompressed_offset, chunk.uncompressed_size, chunk.key_0)
