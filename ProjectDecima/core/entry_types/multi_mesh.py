@@ -28,7 +28,7 @@ class MultiMeshResourcePart:
 
 
 class MultiMeshResource(MeshResourceBase):
-    exportable = True
+    # exportable = True
     magic = 0x9FC36C15337A680A
 
     def __init__(self):
@@ -48,7 +48,10 @@ class MultiMeshResource(MeshResourceBase):
             json.dump(self.dump(), f, indent=2)
 
     def dump(self):
-        return {'parts': [part.dump() for part in self.parts]}
+        return {
+            'class': self.class_name,
+            'parts': [part.dump() for part in self.parts],
+        }
 
 
 class LodMeshResourcePart:
@@ -61,11 +64,18 @@ class LodMeshResourcePart:
         self.mesh.parse(reader, core_file)
         self.distance = reader.read_float()
 
+    def dump(self):
+        return {
+            'distance': self.distance,
+            'mesh': self.mesh.ref.dump()
+        }
+
 
 EntryTypeManager.register_handler(MultiMeshResource)
 
 
 class LodMeshResource(MeshResourceBase):
+    exportable = True
     magic = 0x36B88667B0A33134
 
     def __init__(self):
@@ -80,6 +90,15 @@ class LodMeshResource(MeshResourceBase):
             lod = LodMeshResourcePart()
             lod.parse(reader, core_file)
             self.lods.append(lod)
+
+    def export(self, output_path: Path):
+        with (output_path / f'{self.guid}.ds_json').open('w') as f:
+            json.dump(self.dump(), f, indent=2)
+
+    def dump(self):
+        return {'class': self.class_name,
+                'lods': [part.dump() for part in self.lods]
+                }
 
 
 EntryTypeManager.register_handler(LodMeshResource)

@@ -188,7 +188,9 @@ class RegularSkinnedMeshResource(RegularSkinnedMeshResourceBase):
 
     def dump(self):
         import base64
+        self.mesh_stream.stream_reader.seek(0)
         return {'class': self.__class__.__name__,
+                'mesh_stream_size': self.mesh_stream.stream_reader.size(),
                 'mesh_stream': base64.b64encode(self.mesh_stream.stream_reader.read_bytes(-1)).decode('utf-8'),
                 'primitives': [prim.ref.dump() for prim in self.primitives],
                 'materials': [shd.ref.dump() for shd in self.shading_groups]
