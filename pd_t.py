@@ -3,7 +3,7 @@ from pathlib import Path
 
 from ProjectDecima.archive.archive_manager import ArchiveManager
 from ProjectDecima.core.entry_reference import EntryReference
-from ProjectDecima.core.stream_reference import StreamReference
+from ProjectDecima.core.stream_reference import StreamingDataSource
 from ProjectDecima.core.core_file import CoreFile
 from ProjectDecima.archive.archive import Archive
 
@@ -29,11 +29,11 @@ def test_archives():
     archive_path = r"F:\SteamLibrary\steamapps\common\Death Stranding\data\7017f9bb9d52fc1c4433599203cc51b1.bin"
     archive = Archive(archive_path)
     archive.parse()
-    a = archive.queue_file("ds/models/characters/sam_sam/core/sam_body_naked/model/parts/mesh_bodynaked_lx.core")
-    if a:
-        a.parse()
-
-    print(a)
+    # a = archive.queue_file("ds/models/characters/sam_sam/core/sam_body_naked/model/parts/mesh_bodynaked_lx.core")
+    # if a:
+    #     a.parse()
+    #
+    # print(a)
     pass
 
 
@@ -43,29 +43,34 @@ def test_archive_set():
     arch_set.parse_all()
 
     file = Path(
-        # r"F:\SteamLibrary\steamapps\common\Death Stranding\dump\ds\entities\player\variant\ds_player_variant_sam_body_suit.core")
-        r"F:\SteamLibrary\steamapps\common\Death Stranding\dump\ds\models\characters\sam_sa~~m\core\sam_body_naked\model\parts\mesh_bodynaked_lx.core")
-
+        # r"F:\SteamLibrary\steamapps\common\Death Stranding\dump\ds\entities\player\variant\ds_player_variant_sam_body_suit.core"
+        # r"F:\SteamLibrary\steamapps\common\Death Stranding\dump\localized\sentences\ds_lines_sam\lines_sam\sentences.core"
+        r"F:\SteamLibrary\steamapps\common\Death Stranding\dump\ds\models\characters\sam_sam\core\sam_body_naked\model\parts\mesh_bodynaked_lx.core"
+        # r"ds/models/weapons/asr0_assaultrifle0/core/asr0_textures/textures/asr0_main_fgh_set.core"
+        # r"F:\SteamLibrary\steamapps\common\Death Stranding\dump\ds\artparts\characters\sam_sam\part_sam_body_suiti.core"
+        # r"F:\SteamLibrary\steamapps\common\Death Stranding\dump\ds\models\characters\sam_sam\core\sam_body_naked\model\parts\mesh_upperbody_lx.core"
+        # r"F:\SteamLibrary\steamapps\common\Death Stranding\dump\ds\sounds\wwise_bnk_collections\sd_wwise_bnk_collection_game_resident.core"
+        # "ds/sounds/systems/sd_ds_facts"
+        # "ds/models/characters/sam_sam/core/sam_body_naked/model/parts/mesh_upperbody_lx.core"
+        # "ds/sounds/systems/sd_system_submix_settings"
+        # "ds/models/characters/sam_sam/core/sam_textures/textures/sam_body_naked_v01_set"
+        # "ds/models/characters/sam_sam/core/sam_textures/textures/sam_body_subpouch_v00_set.core"
+        # "localized/sentences/ds_lines_sam/lines_sam/sentences.core"
+        # "ds/archives/music_player_resource.core"
+    )
     if file.is_dir():
         for file in Path(file).rglob('*.core'):
             core_file = CoreFile(file)
             core_file.parse()
-            for ent in core_file.entries:
-                if ent.header.magic == 0xA664164D69FD2B38:
-                    ent.export(r"F:\SteamLibrary\steamapps\common\Death Stranding\dump")
-                elif ent.header.magic == 0x150c273beb8f2d0c:
-                    os.makedirs(
-                        Path(r"F:\SteamLibrary\steamapps\common\Death Stranding\dump") / core_file.filepath.with_suffix(
-                            '') / str(
-                            ent.header.guid.__str__()), exist_ok=True)
-                    ent.export(
-                        Path(r"F:\SteamLibrary\steamapps\common\Death Stranding\dump") / core_file.filepath.with_suffix(
-                            '') / str(
-                            ent.header.guid.__str__()))
             pass
-    else:
+    elif file.is_file():
         core_file = CoreFile(file)
         core_file.parse()
+        pass
+    else:
+        core_file = arch_set.queue_file(file.as_posix(), True)
+        print(core_file)
+
         pass
 
 
