@@ -190,6 +190,8 @@ class RegularSkinnedMeshResource(RegularSkinnedMeshResourceBase):
         import base64
         self.mesh_stream.stream_reader.seek(0)
         return {'class': self.__class__.__name__,
+                'position_bounds_scale': self.position_bounds_scale,
+                'position_bounds_offset': self.position_bounds_offset,
                 'mesh_stream_size': self.mesh_stream.stream_reader.size(),
                 'mesh_stream': base64.b64encode(self.mesh_stream.stream_reader.read_bytes(-1)).decode('utf-8'),
                 'primitives': [prim.ref.dump() for prim in self.primitives],
