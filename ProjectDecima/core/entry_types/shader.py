@@ -9,15 +9,16 @@ from ...utils.dx_shader.shader import DXShader
 
 
 class ShaderType(IntEnum):
-    UNDEFINED = 0
-    VERTEX_SHADER = 2
-    PIXEL_SHADER = 3
+    Compute = 0
+    Geometry = 1
+    Vertex = 2
+    Pixel = 3
 
 
 class ShaderEntry:
 
     def __init__(self):
-        self.shader_type = ShaderType.UNDEFINED
+        self.shader_type = ShaderType.Compute
         self.shader_version = 0
         self.shader = DXShader()
 

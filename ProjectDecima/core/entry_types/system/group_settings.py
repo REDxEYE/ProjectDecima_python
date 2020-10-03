@@ -1,32 +1,42 @@
+from enum import IntEnum
 from pathlib import Path
 from typing import List, Dict, Type
 
 from .. import CoreDummy
+from ..resource import Resource
 from ...core_entry_handler_manager import EntryTypeManager
 from ...entry_reference import EntryReference
 from ...pod.strings import HashedString
 from ....utils.byte_io_ds import ByteIODS
 
 
-class Settings(CoreDummy):
+class ESoundGroupType(IntEnum):
+    SoundEffect = 0
+    Dialogue = 1
+    Music = 2
+    MusicAmadeus = 3
+
+
+class SoundGroup(Resource):
     magic = 0x7FC28103CEBC534C
 
     def __init__(self):
         super().__init__()
-        self.unk_0 = 0
-        self.ref_0 = EntryReference()
-        self.unk_1 = 0
-        self.unk_2 = 0
-        self.unk_3 = 0
+        self.type = ESoundGroupType.SoundEffect
+        self.destination = EntryReference()
+        self.pause_with_game = 0
+        self.reverb = 0
+        self.priority = 0
+        self.instance_limit = 0
 
     def parse(self, reader: ByteIODS, core_file):
-        self.header.parse(reader)
-        self.guid = reader.read_guid()
-        self.unk_0 = reader.read_uint8()
-        self.ref_0.parse(reader, core_file)
-        self.unk_1 = reader.read_uint16()
-        self.unk_2 = reader.read_uint32()
-        self.unk_3 = reader.read_int32()
+        super().parse(reader, core_file)
+        self.type = ESoundGroupType(reader.read_uint8())
+        self.destination.parse(reader, core_file)
+        self.pause_with_game = reader.read_uint8()
+        self.reverb = reader.read_uint8()
+        self.priority = reader.read_uint32()
+        self.instance_limit = reader.read_int32()
 
 
-EntryTypeManager.register_handler(Settings)
+EntryTypeManager.register_handler(SoundGroup)

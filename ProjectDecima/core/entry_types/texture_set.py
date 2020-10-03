@@ -2,6 +2,7 @@ from enum import IntEnum
 from typing import List
 
 from . import CoreDummy
+from .resource import Resource
 from ..core_entry_handler_manager import EntryTypeManager
 from ..pod.strings import HashedString
 from ...utils.byte_io_ds import ByteIODS
@@ -45,6 +46,7 @@ class ETextureSetStorageType(IntEnum):
     B = 3
     A = 4
     Count = 5
+    Unk = 6
 
 
 class ETextureSetQualityType(IntEnum):
@@ -108,14 +110,15 @@ class TextureSetTextureDesc:
         self.storage_type = ETextureSetStorageType(reader.read_uint32())
         self.quality_type = ETextureSetQualityType(reader.read_uint32())
         self.compression_method = EImageCompressionMethod(reader.read_uint32())
-        if self.active == 0:
-            reader.skip(4)
-        else:
+        if self.active:
             self.width, self.height = reader.read_fmt('2I')
+        else:
+            reader.skip(4)
+
         self.default_color = reader.read_fmt('4f')
 
 
-class TextureSet(CoreDummy):
+class TextureSet(Resource):
     magic = 0xA321E8C307328D2E
 
     def __init__(self):
@@ -126,8 +129,7 @@ class TextureSet(CoreDummy):
         self.preset = EntryReference()
 
     def parse(self, reader: ByteIODS, core_file):
-        self.header.parse(reader)
-        self.guid = reader.read_guid()
+        super().parse(reader, core_file)
         entry_count = reader.read_uint32()
         for _ in range(entry_count):
             entry = TextureSetEntry()

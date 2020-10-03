@@ -3,6 +3,7 @@ from pathlib import Path
 from uuid import UUID
 
 from . import CoreDummy
+from .resource import Resource
 from ..core_entry_handler_manager import EntryTypeManager
 from ...core.stream_reference import StreamingDataSource
 from ...utils.byte_io_ds import ByteIODS
@@ -95,7 +96,7 @@ class TexturePixelFormat(IntEnum):
     BC7 = 75
 
 
-class Texture(CoreDummy):
+class Texture(Resource):
     magic = 0xA664164D69FD2B38
 
     def __init__(self):
@@ -120,8 +121,7 @@ class Texture(CoreDummy):
         self.data_buffer = b''
 
     def parse(self, reader: ByteIODS, core_file):
-        self.header.parse(reader)
-        self.guid = reader.read_guid()
+        super().parse(reader,core_file)
         self.texture_type = ETextureType(reader.read_uint8())
         reader.skip(1)
         self.width, self.height = reader.read_fmt('2H')

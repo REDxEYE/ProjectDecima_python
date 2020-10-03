@@ -1,10 +1,11 @@
 from typing import List, Dict, Tuple
 
-from . import CoreDummy
-from ..core_entry_handler_manager import EntryTypeManager
-from ..entry_reference import EntryReference
-from ..pod.strings import HashedString
-from ...utils.byte_io_ds import ByteIODS
+from ProjectDecima.core.entry_types import CoreDummy
+from ProjectDecima.core.entry_types.resource import Resource
+from ProjectDecima.core.core_entry_handler_manager import EntryTypeManager
+from ProjectDecima.core.entry_reference import EntryReference
+from ProjectDecima.core.pod.strings import HashedString
+from ProjectDecima.utils.byte_io_ds import ByteIODS
 
 
 class Joint:
@@ -31,7 +32,7 @@ class SkeletonAnimChannel:
         return f'<AnimChannel "{self.name}">'
 
 
-class Skeleton(CoreDummy):
+class Skeleton(Resource):
     magic = 0x11E1D1A40B933E66
 
     def __init__(self):
@@ -43,11 +44,10 @@ class Skeleton(CoreDummy):
         self.anim_channel_name_to_handle: Dict[str, Tuple[HashedString, int]] = {}
         self.skeleton_layout_hash = 0
         self.skeleton_channel_layout_hash = 0
-        self.edge_anim_skeleton:List[int] = []
+        self.edge_anim_skeleton: List[int] = []
 
     def parse(self, reader: ByteIODS, core_file):
-        self.header.parse(reader)
-        self.guid = reader.read_guid()
+        super().parse(reader, core_file)
         array_size = reader.read_uint32()
         for _ in range(array_size):
             joint = Joint()
@@ -75,22 +75,22 @@ class Skeleton(CoreDummy):
         array_size = reader.read_uint32()
         self.edge_anim_skeleton = list(reader.read_fmt(f'{array_size}B'))
 
+
 EntryTypeManager.register_handler(Skeleton)
 
 
-class ArmatureReference(CoreDummy):
+class DSCoverModelPreComputedResource(Resource):
     magic = 0xb1d37c8f8304785b
 
     def __init__(self):
         super().__init__()
-        self.unk_entry_ref = EntryReference()
-        self.armature_ref = EntryReference()
+        self.bbox = EntryReference()
+        self.repr_skeleton = EntryReference()
 
     def parse(self, reader: ByteIODS, core_file):
-        self.header.parse(reader)
-        self.guid = reader.read_guid()
-        self.unk_entry_ref.parse(reader, core_file)
-        self.armature_ref.parse(reader, core_file)
+        super().parse(reader, core_file)
+        self.bbox.parse(reader, core_file)
+        self.repr_skeleton.parse(reader, core_file)
 
 
-EntryTypeManager.register_handler(ArmatureReference)
+EntryTypeManager.register_handler(DSCoverModelPreComputedResource)

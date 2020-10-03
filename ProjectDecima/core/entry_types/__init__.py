@@ -1,21 +1,24 @@
 from .dummy import CoreDummy, CoreDummy_60, CoreDummy_4
-from .song_info import UnkSongBlock, SongInfo, UnkBlock, UnkBlock2
-from .entity import EntityModelInfo, EntityMeshInfo
-from .material import Material, MaterialReference
-from .system.audio_system import AudioUnk, ControlName, AudioUnk3, AudioUnk4
-from .system.group_settings import Settings
+from .sound import DSMusicPlayerSystemResource, DSMusicPlayerAlbumResource, DSMusicPlayerArtistResource, \
+    DSMusicPlayerTrackResource
+from .player_body_variants import DSPlayerBodyVariant
+from ProjectDecima.core.entry_types.model.model_resource import SkinnedModelResource
+from .material import RenderEffectResource, ShadingGroup
+from .system.facts import BooleanFact, EnumFactEntry, FloatFact, EnumFact
+from .system.group_settings import SoundGroup
 from .texture import Texture
-from .model import CoreModel
+from .fact import Fact
+from ProjectDecima.core.entry_types.model.model_resource import SkinnedModelResource, RegularSkinnedMeshResource
 from .shader import CoreShader
-from .armature import Skeleton, ArmatureReference
-from .bone_data import CoreBoneData
+from ProjectDecima.core.entry_types.model.armature import Skeleton, DSCoverModelPreComputedResource
+from ProjectDecima.core.entry_types.model.bone_data import SkinnedMeshIndexedJointBindings
 from .texture_set import TextureSet
-from .translation import Translation, VoiceRef, VoiceTranslation, SpeakerInfo
-from .unk_entry import BoneRelatedEntry, UnkEntry, UnkEntry2
-from .sound_bank import SoundDesc, WWiseSound
-from .collection import CoreRefCollection
-from .unk_model_entry import UnkModelEntry, UnkModelEntry2
-from .level.level_tile_collection import LevelTileCollection
-from .level.level_lod_info import LevelTileLodInfo, LevelTileLod, LevelLodUnk
-from .mesh_info import IndexArrayResource, UnkVertexInfo, PrimitiveResource, VertexArrayResource, MeshStreamInfo
-from .system.submix_settings import UnkSettings0,UnkSettings1
+from .translation import LocalizedTextResource, SentenceResource, LocalizedSimpleSoundResource, VoiceResource
+from ProjectDecima.core.entry_types.model.model_part import SkinnedMeshBoneBoundingBoxes, ArtPartsSubModelWithChildrenResource, ArtPartsSubModelResource
+from .sound_bank import WwiseBankInstance, WwiseBankResource
+from .collection import ObjectCollection
+from .multi_mesh import MultiMeshResource, LodMeshResource
+from .level.level_tile_collection import TileBasedStreamingStrategyResource
+from .level.level_lod_info import StreamingTileStateResource, StreamingTileLODResource, StreamingTileResource
+from ProjectDecima.core.entry_types.model.mesh_info import IndexArrayResource, RegularSkinnedMeshResourceSkinInfo, PrimitiveResource, VertexArrayResource, DataBufferResource
+from .system.submix_settings import SubmixResource, SoundMasterBusResource

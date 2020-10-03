@@ -2,34 +2,35 @@ from pathlib import Path
 from typing import List, Dict, Type, Tuple
 
 from . import CoreDummy
+from .resource import Resource
 from ..core_entry_handler_manager import EntryTypeManager
+from ..core_object import CoreObject
 from ..entry_reference import EntryReference
 from ..pod.strings import UnHashedString
 from ...utils.byte_io_ds import ByteIODS
 from ...utils.wwise_sound_bank.section_info import BKHD, DIDX, WWiseSection, DATA, GenericBlock
 
 
-class SoundDesc(CoreDummy):
+class WwiseBankInstance(CoreObject):
     magic = 0xEB0930FE3433F89F
 
     def __init__(self):
         super().__init__()
-        self.sound_refs: List[EntryReference] = []
+        self.banks: List[EntryReference] = []
 
     def parse(self, reader: ByteIODS, core_file):
-        self.header.parse(reader)
-        self.guid = reader.read_guid()
+        super().parse(reader, core_file)
         ref_count = reader.read_uint32()
         for _ in range(ref_count):
             ref = EntryReference()
             ref.parse(reader, core_file)
-            self.sound_refs.append(ref)
+            self.banks.append(ref)
 
 
-EntryTypeManager.register_handler(SoundDesc)
+EntryTypeManager.register_handler(WwiseBankInstance)
 
 
-class WWiseSound(CoreDummy):
+class WwiseBankResource(Resource):
     magic = 0x150c273beb8f2d0c
     _sections_handlers = {
         b'BKHD': BKHD,
@@ -39,9 +40,9 @@ class WWiseSound(CoreDummy):
 
     def __init__(self):
         super().__init__()
-        self.unk_0 = 0
-        self.wwise_size = 0
-        self.unk_1 = 0
+        self.bank_id = 0
+        self.bank_size = 0
+        self.bank_data_size = 0
         self.sections: Dict[bytes, WWiseSection] = {}
         self.wave_files = []
         self.unk_2 = []
@@ -52,11 +53,10 @@ class WWiseSound(CoreDummy):
         return self._sections_handlers.get(magic, GenericBlock)
 
     def parse(self, reader: ByteIODS, core_file):
-        self.header.parse(reader)
-        self.guid = reader.read_guid()
+        super().parse(reader, core_file)
         start = reader.tell()
-        self.unk_0, self.wwise_size, self.unk_1 = reader.read_fmt('3I')
-        sub_reader = ByteIODS(reader.read_bytes(self.wwise_size))
+        self.bank_id, self.bank_size, self.bank_data_size = reader.read_fmt('3I')
+        sub_reader = ByteIODS(reader.read_bytes(self.bank_size))
         while sub_reader:
             header, size = sub_reader.peek_fmt('4sI')
             handler = self._get_section_handler(header)
@@ -74,7 +74,7 @@ class WWiseSound(CoreDummy):
                 data.sub_reader.seek(entry.offset)
                 wav_data = data.sub_reader.read_bytes(entry.size)
                 self.wave_files.append(wav_data)
-        reader.seek(start+self.unk_1)
+        reader.seek(start + self.bank_data_size)
         reader.skip(4 * 3)
         str_count = reader.read_uint32()
         self.unk_2 = reader.read_fmt(f'{str_count}I')
@@ -93,4 +93,4 @@ class WWiseSound(CoreDummy):
                 f.write(file)
 
 
-EntryTypeManager.register_handler(WWiseSound)
+EntryTypeManager.register_handler(WwiseBankResource)

@@ -52,7 +52,43 @@ class CoreDummy_4(CoreDummy):
         reader.skip(self.header.size - 20)
 
 
-EntryTypeManager.register_handler(CoreDummy_4, CoreDummy_4.magic)
-EntryTypeManager.register_handler(CoreDummy_4, 0xE59AB7DFD80B9421)
-EntryTypeManager.register_handler(CoreDummy_4, 0x8FAA995D50547F10)
-EntryTypeManager.register_handler(CoreDummy_4, 0xFF5B35CA05453AC)
+class PhysicsSimpleShapeResource(CoreDummy):
+    magic = 0x71F9F6716E87D88D
+
+
+class ArtPartsCoverModelResource(CoreDummy):
+    magic = 0x8FB6D1083030A794
+
+
+class DSRenderEffectSwapperElement(CoreDummy):
+    magic = 0xE5A008AAA3BDDACA
+
+
+class DSRenderEffectSwapper(CoreDummy):
+    magic = 0xC574EFD30DB911E4
+
+
+class PhysicsCollisionInstance(CoreDummy_4):
+    magic = 0xE59AB7DFD80B9421
+
+
+class PhysicsHeightMapOffsetCollisionResource(CoreDummy_4):
+    magic = 0x8FAA995D50547F10
+
+
+class PhysicsWaterPoolFromHeightMap(CoreDummy_4):
+    magic = 0xFF5B35CA05453AC
+
+
+class PhysicsCollisionResource(CoreDummy_4):
+    magic = 0x3650BFD5E3DDF318
+
+
+EntryTypeManager.register_handler(PhysicsSimpleShapeResource)
+EntryTypeManager.register_handler(ArtPartsCoverModelResource)
+EntryTypeManager.register_handler(DSRenderEffectSwapperElement)
+EntryTypeManager.register_handler(DSRenderEffectSwapper)
+EntryTypeManager.register_handler(PhysicsCollisionInstance)
+EntryTypeManager.register_handler(PhysicsHeightMapOffsetCollisionResource)
+EntryTypeManager.register_handler(PhysicsWaterPoolFromHeightMap)
+EntryTypeManager.register_handler(PhysicsCollisionResource)

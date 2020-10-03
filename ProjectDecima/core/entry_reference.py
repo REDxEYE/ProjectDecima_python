@@ -50,7 +50,7 @@ class EntryReference:
             core_file.local_links.append(self)
         if self._archive_manager:
             if self.load_method in [LoadMethod.ImmediateCoreFile, LoadMethod.CoreFile]:
-                print(f'Loading referenced core file: {self._file_ref}')
+                # print(f'Loading referenced core file: {self._file_ref}')
                 core = self._archive_manager.queue_file(self._file_ref, True)
                 self.ref = core.get_by_guid(self.guid)
                 self._core_file = core
