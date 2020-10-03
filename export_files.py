@@ -2,8 +2,6 @@ import os
 from pathlib import Path
 
 from ProjectDecima import ArchiveManager
-from ProjectDecima.core.entry_reference import EntryReference
-from ProjectDecima.core.stream_reference import StreamReference
 
 
 def main():
@@ -18,6 +16,7 @@ def main():
             'Core file path: ') or "localized/sentences/ds_lines_common/lines_1p5_dsp_global/sentences.core"
         if not core_file_path:
             break
+        core_file_path = core_file_path.replace('\\', '/')
         file = ar_set.queue_file(core_file_path, True)
         os.makedirs((dump_dir / Path(core_file_path).with_suffix('')), exist_ok=True)
         file_dump_path = dump_dir / Path(core_file_path).with_suffix('')
@@ -26,7 +25,7 @@ def main():
                 continue
             entry_dump_path = file_dump_path
             os.makedirs(entry_dump_path, exist_ok=True)
-            entry.dump(entry_dump_path)
+            entry.export(entry_dump_path)
 
 
 if __name__ == '__main__':
