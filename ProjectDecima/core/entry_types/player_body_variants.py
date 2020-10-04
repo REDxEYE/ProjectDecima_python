@@ -31,6 +31,16 @@ class DSPlayerBodyVariant(DSPlayerBodyVariantInterface):
             self.art_parts_variations.append(ref)
         self.shoes_art_parts_variations.parse(reader, core_file)
 
+    def dump(self) -> dict:
+        out = super().dump()
+        out.update({
+            'skinned_mesh_resource': self.skinned_mesh_resource.dump(),
+            'boots_skinned_model_resource': self.boots_skinned_model_resource.dump(),
+            'art_parts_variations': [part.dump() for part in self.art_parts_variations],
+            'shoes_art_parts_variations': self.shoes_art_parts_variations.dump(),
+
+        })
+        return out
+
 
 EntryTypeManager.register_handler(DSPlayerBodyVariant)
-

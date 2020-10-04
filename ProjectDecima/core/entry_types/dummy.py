@@ -19,7 +19,7 @@ class CoreDummy:
         self.guid = reader.read_guid()
         reader.skip(self.header.size - 16)
 
-    def dump(self, output_path: Path):
+    def dump(self):
         pass
 
     def __repr__(self):

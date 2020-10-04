@@ -24,8 +24,8 @@ class RTTIObject:
     def export(self, path: str):
         pass
 
-    def dump(self):
-        pass
+    def dump(self) -> dict:
+        return dict()
 
 
 EntryTypeManager.register_handler(RTTIObject)

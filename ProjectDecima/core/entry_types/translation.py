@@ -95,7 +95,7 @@ class SentenceResource(Resource):
         self.text.parse(reader, core_file)
         self.voice.parse(reader, core_file)
 
-    def dump(self, output_path: Path):
+    def export(self, output_path: Path):
         text: LocalizedTextResource = self.text.ref
         voice: LocalizedSimpleSoundResource = self.sound.ref
         speaker: VoiceResource = self.voice.ref
@@ -185,7 +185,12 @@ class LocalizedTextResource(Resource):
             return self
 
         def dump(self):
-            return {'string': self.string, 'comment': self.comment, 'flag': self.flag}
+            return {
+                'class': self.__class__.__name__,
+                'string': self.string,
+                'comment': self.comment,
+                'flag': self.flag
+            }
 
         def __repr__(self):
             return f'<Localized string: "{self.string}" : {self.comment}>'

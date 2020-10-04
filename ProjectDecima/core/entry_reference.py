@@ -56,3 +56,11 @@ class EntryReference:
                 self._core_file = core
         else:
             raise Exception('No archive manager instance were provided')
+
+    def dump(self):
+        if self.ref:
+            return self.ref.dump()
+        elif self.load_method == LoadMethod.NotPresent:
+            return {}
+        else:
+            return {'error': 'Reference not resolved'}

@@ -26,6 +26,15 @@ class SkinnedMeshBoneBoundingBoxes(Resource):
         self.uses_indices = reader.read_uint8()
         self.initialized = reader.read_uint8()
 
+    def dump(self):
+        return {
+            'class': self.class_name,
+            'bone_bbox': self.bone_bbox,
+            'indices': self.indices,
+            'uses_indices': self.uses_indices,
+            'initialized': self.initialized,
+        }
+
 
 EntryTypeManager.register_handler(SkinnedMeshBoneBoundingBoxes)
 
@@ -47,6 +56,16 @@ class ArtPartsSubModelWithChildrenResource(ResourceWithNameHash):
             self.children.append(ref)
         self.art_parts_sub_model_part_resource.parse(reader, core_file)
         self.hidden = reader.read_uint8()
+
+    def dump(self):
+        out = super().dump()
+        out.update({
+            'class': self.class_name,
+            'children': [ch.dump() for ch in self.children],
+            'art_parts_sub_model_part_resource': self.art_parts_sub_model_part_resource.dump(),
+            'hidden': self.hidden
+        })
+        return out
 
 
 EntryTypeManager.register_handler(ArtPartsSubModelWithChildrenResource)
@@ -83,28 +102,62 @@ class ModelPartResource(ResourceWithNameHash):
         self.helper_node = reader.read_hashed_string()
         self.render_effect_allocation_mode = ERenderEffectAllocationMode(reader.read_uint32())
 
+    def dump(self) -> dict:
+        out = super().dump()
+        out.update({
+            'class': self.class_name,
+            'mesh_resource': self.mesh_resource.dump(),
+            'bone_bounding_boxes': self.bone_bounding_boxes.dump(),
+            'physics_resource': self.physics_resource.dump(),
+            'part_motion_type': self.part_motion_type.value,
+            'helper_node': self.helper_node,
+            'render_effect_allocation_mode': self.render_effect_allocation_mode.value,
+        })
+        return out
+
+
+class EArtPartsSubModelKind(IntEnum):
+    NONE = 0
+    Cover = 1
+    CoverAndAnim = 2
+
 
 class ArtPartsSubModelResource(ModelPartResource):
     magic = 0x2ED3FA0EE459E5AC
 
     def __init__(self):
         super().__init__()
-        self.unk_0 = 0
-        self.part_mesh_ref = EntryReference()
-        self.ref = EntryReference()
+        self.helper_resource = EntryReference()
+        self.skinned_model_pose_deformer_resource = EntryReference()
+        self.skeleton = EntryReference()
+        self.local_offset_matrix = []
+        self.extra_resource = EntryReference()
+        self.model_kind = EArtPartsSubModelKind.NONE
+        self.is_hide_default = False
 
     def parse(self, reader: ByteIODS, core_file):
-        self.header.parse(reader)
-        self.guid = reader.read_guid()
-        self.unk_0 = reader.read_uint32()
-        no_second_guid = False
-        if reader.peek_int16() == 0:
-            no_second_guid = True
-            reader.skip(2)
-        self.part_mesh_ref.parse(reader, core_file)
-        if not no_second_guid:
-            self.ref.parse(reader, core_file)
-        reader.skip(82 + int(not no_second_guid))
+        super().parse(reader, core_file)
+        self.helper_resource.parse(reader, core_file)
+        self.skinned_model_pose_deformer_resource.parse(reader, core_file)
+        self.skeleton.parse(reader, core_file)
+        self.local_offset_matrix = reader.read_fmt('16f')
+        self.extra_resource.parse(reader, core_file)
+        self.model_kind = EArtPartsSubModelKind(reader.read_uint32())
+        self.is_hide_default = reader.read_uint8()
+
+    def dump(self) -> dict:
+        out = super().dump()
+        out.update({
+            'class': self.class_name,
+            'helper_resource': self.helper_resource.dump(),
+            'skinned_model_pose_deformer_resource': self.skinned_model_pose_deformer_resource.dump(),
+            'local_offset_matrix': self.local_offset_matrix,
+            'skeleton': self.extra_resource.dump(),
+            'extra_resource': self.extra_resource.dump(),
+            'model_kind': self.model_kind.value,
+            'is_hide_default': self.is_hide_default,
+        })
+        return out
 
 
 EntryTypeManager.register_handler(ArtPartsSubModelResource)

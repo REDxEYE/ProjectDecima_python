@@ -120,6 +120,15 @@ class VertexSkin:
         self.normal = reader.read_fmt('3B')
         self.bone = reader.read_fmt('8H')
 
+    def dump(self):
+        return {
+            'class': self.__class__.__name__,
+            'pos': self.pos,
+            'weight': self.weight,
+            'normal': self.normal,
+            'bone': self.bone,
+        }
+
 
 class VertexSkinNBT(VertexSkin):
     def __init__(self):
@@ -131,6 +140,12 @@ class VertexSkinNBT(VertexSkin):
         super().parse(reader)
         self.bi_tangent = reader.read_fmt('3B')
         self.tangent = reader.read_fmt('3B')
+
+    def dump(self):
+        res = self.dump()
+        res['bi_tangent'] = self.bi_tangent
+        res['tangent'] = self.tangent
+        return res
 
 
 class PrimitiveSkinInfo:
@@ -160,6 +175,19 @@ class PrimitiveSkinInfo:
             skin.parse(reader)
             self.vertices_skin_nbt.append(skin)
 
+    def dump(self):
+        return {
+            'class': self.__class__.__name__,
+            'type': self.type.value,
+            'skin_vtx_type': self.skin_vtx_type.value,
+            'blend_shape_mask': self.blend_shape_mask,
+            'vertex_count': self.vertex_count,
+            'vertex_compute_nbt_count': self.vertex_compute_nbt_count,
+            'vtx_tri_list_buffer': self.vtx_tri_list_buffer.dump(),
+            'vertices_skin': [skin.dump() for skin in self.vertices_skin],
+            'vertices_skin_nbt': [skin.dump() for skin in self.vertices_skin_nbt],
+        }
+
 
 class VertexDeltaDeformation:
     def __init__(self):
@@ -171,6 +199,14 @@ class VertexDeltaDeformation:
         self.pos = reader.read_fmt('3f')
         self.nrm = reader.read_fmt('3B')
         self.vertex_index = reader.read_uint8()
+
+    def dump(self):
+        return {
+            'class': self.__class__.__name__,
+            'pos': self.pos,
+            'nrm': self.nrm,
+            'vertex_index': self.vertex_index,
+        }
 
 
 class BlendTargetDeformation:
@@ -187,6 +223,18 @@ class BlendTargetDeformation:
                 deform.parse(reader)
                 def_array.append(deform)
             self.deformations.append(def_array)
+
+    def dump(self):
+        out = {
+            'name': self.name,
+            'deformations': [],
+        }
+        for def_array in self.deformations:
+            tmp = []
+            for deform in def_array:
+                tmp.append(deform.dump())
+            out['deformations'].append(tmp)
+        return out
 
 
 class RegularSkinnedMeshResourceSkinInfo(Resource):
@@ -207,6 +255,13 @@ class RegularSkinnedMeshResourceSkinInfo(Resource):
             target = BlendTargetDeformation()
             target.parse(reader)
             self.blend_target_deforms.append(target)
+
+    def dump(self):
+        return {
+            'class': self.class_name,
+            'parts': [part.dump() for part in self.parts],
+            'blend_target_deforms': [target.dump() for target in self.blend_target_deforms],
+        }
 
 
 EntryTypeManager.register_handler(RegularSkinnedMeshResourceSkinInfo)
@@ -234,6 +289,18 @@ class DataBufferResource(Resource):
             self.format = EDataBufferFormat(reader.read_uint32())
             self.buffer_stride = reader.read_uint32()
         self.mesh_stream.parse(reader)
+
+    def dump(self):
+        return {
+            'class': self.class_name,
+            'buffer_count': self.buffer_count,
+            'is_streaming': self.is_streaming,
+            'flags': self.flags,
+            'format': self.format.value,
+            'buffer_stride': self.buffer_stride,
+            'mesh_stream': self.mesh_stream.dump()
+
+        }
 
 
 EntryTypeManager.register_handler(DataBufferResource)
@@ -266,10 +333,14 @@ class PrimitiveResource(Resource):
 
     def dump(self):
         return {
-            'vertex_array': self.vertex_array.ref.dump(),
-            'index_array': self.index_array.ref.dump(),
+            'class': self.class_name,
+            'vertex_array': self.vertex_array.dump(),
+            'index_array': self.index_array.dump(),
             'index_start': self.start_index,
+            'bbox': self.bbox,
+            # 'skd_tree': self.skd_tree.dump(),
             'index_end': self.index_end,
+            'hash': self.hash,
         }
 
 
@@ -356,7 +427,10 @@ class VertexStream:
 
     def dump(self):
         return {
+            'class': self.__class__.__name__,
             'stride': self.stride,
+            'flags': self.flags,
+            'guid_0': str(self.guid_0),
             'elements': [
                 {'offset': elem[0],
                  'element_type': elem[1].value,

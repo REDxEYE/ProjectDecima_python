@@ -21,9 +21,10 @@ class MultiMeshResourcePart:
 
     def dump(self):
         return {
+            'class': self.__class__.__name__,
             'pos': self.world_pos,
             'rot': self.rot_matrix,
-            'mesh': self.mesh.ref.dump()
+            'mesh': self.mesh.dump()
         }
 
 
@@ -48,10 +49,12 @@ class MultiMeshResource(MeshResourceBase):
             json.dump(self.dump(), f, indent=2)
 
     def dump(self):
-        return {
+        out = super().dump()
+        out.update({
             'class': self.class_name,
             'parts': [part.dump() for part in self.parts],
-        }
+        })
+        return out
 
 
 class LodMeshResourcePart:
@@ -66,8 +69,9 @@ class LodMeshResourcePart:
 
     def dump(self):
         return {
+            'class': self.__class__.__name__,
             'distance': self.distance,
-            'mesh': self.mesh.ref.dump()
+            'mesh': self.mesh.dump()
         }
 
 
@@ -96,9 +100,12 @@ class LodMeshResource(MeshResourceBase):
             json.dump(self.dump(), f, indent=2)
 
     def dump(self):
-        return {'class': self.class_name,
-                'lods': [part.dump() for part in self.lods]
-                }
+        out = super().dump()
+        out.update({
+            'class': self.class_name,
+            'lods': [part.dump() for part in self.lods]
+        })
+        return out
 
 
 EntryTypeManager.register_handler(LodMeshResource)

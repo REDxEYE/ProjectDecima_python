@@ -27,6 +27,17 @@ class MeshHierarchyInfo:
          self.lod_mesh_count,
          self.packed_data) = reader.read_fmt('2I4H')
 
+    def dump(self):
+        return {
+            'class': self.__class__.__name__,
+            'mit_node_size': self.mit_node_size,
+            'primitive_count': self.primitive_count,
+            'mesh_count': self.mesh_count,
+            'static_mesh_count': self.static_mesh_count,
+            'lod_mesh_count': self.lod_mesh_count,
+            'packed_data': self.packed_data,
+        }
+
 
 class MeshResourceBase(Resource):
     magic = 0x2879C7EF5EAF5865
@@ -46,7 +57,15 @@ class MeshResourceBase(Resource):
         self.mesh_hierarchy_info.parse(reader)
 
     def dump(self):
-        raise NotImplementedError()
+        out = super().dump()
+        out.update({
+            'class': self.class_name,
+            'static_data_block_size': self.static_data_block_size,
+            'bounding_box': self.bounding_box,
+            'cull_info': self.cull_info,
+            'mesh_hierarchy_info': self.mesh_hierarchy_info.dump(),
+        })
+        return out
 
 
 EntryTypeManager.register_handler(MeshResourceBase)
@@ -93,6 +112,19 @@ class ModelResource(EntityComponentResource):
             self.helpers.append(ref)
         self.helper_name = reader.read_hashed_string()
 
+    def dump(self):
+        out = super().dump()
+        out.update({
+            'class': self.class_name,
+            'model_part_resources': [part.dump() for part in self.model_part_resources],
+            'art_parts_resources': self.art_parts_resources.dump(),
+            'view_layer': self.view_layer.value,
+            'active_view': self.active_view.value,
+            'helpers': [helper.dump() for helper in self.helpers],
+            'helper_name': self.helper_name,
+        })
+        return out
+
 
 class SkinnedModelResource(ModelResource):
     magic = 0xBC79DACC10E13CB7
@@ -126,7 +158,13 @@ class SkinnedMeshResource(MeshResourceBase):
         self.orientation_helpers.parse(reader, core_file)
 
     def dump(self):
-        raise NotImplementedError()
+        out = super().dump()
+        out.update({
+            'class': self.class_name,
+            'skeleton': self.skeleton.dump(),
+            'orientation_helpers': self.orientation_helpers.dump(),
+        })
+        return out
 
 
 EntryTypeManager.register_handler(SkinnedMeshResource)
@@ -150,7 +188,15 @@ class RegularSkinnedMeshResourceBase(SkinnedMeshResource):
         self.skinned_mesh_bone_bboxes.parse(reader, core_file)
 
     def dump(self):
-        raise NotImplementedError()
+        out = super().dump()
+        out.update({
+            'class': self.class_name,
+            'draw_flags': self.draw_flags,
+            'deformer_type': self.deformer_type.value,
+            'skinned_mesh_joints_bindings': self.skinned_mesh_joints_bindings.dump(),
+            'skinned_mesh_bone_bboxes': self.skinned_mesh_bone_bboxes.dump(),
+        })
+        return out
 
 
 EntryTypeManager.register_handler(RegularSkinnedMeshResourceBase)
@@ -187,16 +233,16 @@ class RegularSkinnedMeshResource(RegularSkinnedMeshResourceBase):
         self.mesh_stream.parse(reader)
 
     def dump(self):
-        import base64
-        self.mesh_stream.stream_reader.seek(0)
-        return {'class': self.__class__.__name__,
-                'position_bounds_scale': self.position_bounds_scale,
-                'position_bounds_offset': self.position_bounds_offset,
-                'mesh_stream_size': self.mesh_stream.stream_reader.size(),
-                'mesh_stream': base64.b64encode(self.mesh_stream.stream_reader.read_bytes(-1)).decode('utf-8'),
-                'primitives': [prim.ref.dump() for prim in self.primitives],
-                'materials': [shd.ref.dump() for shd in self.shading_groups]
-                }
+        out = super().dump()
+        out.update({
+            'class': self.class_name,
+            'position_bounds_scale': self.position_bounds_scale,
+            'position_bounds_offset': self.position_bounds_offset,
+            'mesh_stream': self.mesh_stream.dump(),
+            'primitives': [prim.dump() for prim in self.primitives],
+            'materials': [shd.dump() for shd in self.shading_groups],
+        })
+        return out
 
 
 EntryTypeManager.register_handler(RegularSkinnedMeshResource)

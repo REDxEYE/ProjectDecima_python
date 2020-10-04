@@ -101,7 +101,7 @@ class Texture(Resource):
 
     def __init__(self):
         super().__init__()
-        self.texture_type = 0
+        self.texture_type = ETextureType.Tex2D
         self.width = 0
         self.height = 0
         self.layer_count = 0
@@ -121,7 +121,7 @@ class Texture(Resource):
         self.data_buffer = b''
 
     def parse(self, reader: ByteIODS, core_file):
-        super().parse(reader,core_file)
+        super().parse(reader, core_file)
         self.texture_type = ETextureType(reader.read_uint8())
         reader.skip(1)
         self.width, self.height = reader.read_fmt('2H')
@@ -166,6 +166,27 @@ class Texture(Resource):
                                       self.stream.stream_reader.read_bytes(size),
                                       *pixel_info[1])
                 im.save(base_dir / (self.stream.stream_path + '.tga'))
+
+    def dump(self) -> dict:
+        out = {
+            'texture_type': self.texture_type.value,
+            'width': self.width,
+            'height': self.height,
+            'layer_count': self.layer_count,
+            'total_mips': self.total_mips,
+            'pixel_format': self.pixel_format.value,
+            'buffer_size': self.buffer_size,
+            'total_size': self.total_size,
+            'stream_size': self.stream_size,
+            'stream_mips': self.stream_mips,
+        }
+        if self.stream_size > 0:
+            out['stream_path'] = self.stream.stream_path
+        else:
+            import base64
+            out['data'] = base64.b64encode(self.data_buffer).decode('utf-8')
+
+        return out
 
 
 EntryTypeManager.register_handler(Texture)
