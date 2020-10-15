@@ -1,6 +1,6 @@
-from ProjectDecima.core.entry_types.resource import ResourceWithName
+from .resource import ResourceWithName
 from ProjectDecima.utils.byte_io_ds import ByteIODS
-from ProjectDecima.core.entry_types.rtti_object import RTTIObject, RTTIRefObject
+from .rtti_object import RTTIObject, RTTIRefObject
 
 
 class Property(ResourceWithName):

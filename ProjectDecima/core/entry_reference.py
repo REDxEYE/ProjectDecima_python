@@ -52,15 +52,9 @@ class EntryReference:
             if self.load_method in [LoadMethod.ImmediateCoreFile, LoadMethod.CoreFile]:
                 # print(f'Loading referenced core file: {self._file_ref}')
                 core = self._archive_manager.queue_file(self._file_ref, True)
-                self.ref = core.get_by_guid(self.guid)
-                self._core_file = core
+                if core:
+                    self.ref = core.get_by_guid(self.guid)
+                    self._core_file = core
         else:
             raise Exception('No archive manager instance were provided')
 
-    def dump(self):
-        if self.ref:
-            return self.ref.dump()
-        elif self.load_method == LoadMethod.NotPresent:
-            return {}
-        else:
-            return {'error': 'Reference not resolved'}

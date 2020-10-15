@@ -7,14 +7,14 @@ sys.path.append(cur_path)
 
 from ProjectDecima.archive.archive_manager import ArchiveManager
 from ProjectDecima.core.entry_reference import EntryReference
-from ProjectDecima.core.entry_types import *
+from . import *
 from ProjectDecima.core.stream_reference import StreamReference
 import numpy as np
 
 vertex_dtype = np.dtype([('pos', np.float32, (3,)), ('bone_ids', np.uint8, (8,)), ('weights', np.uint8, (8,))])
 
 
-def handle_model(model: CoreModel, ar_set: ArchiveManager):
+def handle_model(model: RegularSkinnedMeshResource, ar_set: ArchiveManager):
     mesh_stream = model.mesh_stream.stream_reader
 
     def pad_offset(block_size):
@@ -53,12 +53,12 @@ mesh_path = input("Mesh path:")
 core_file = ar_set.queue_file(mesh_path, True)
 StreamReference.resolve(ar_set)
 EntryReference.resolve(ar_set)
-model_entries = core_file.get_entries_by_type(UnkModelEntry2)
+model_entries = core_file.get_entries_by_type(LodMeshResource)
 for model_entry in model_entries:
-    model_entry: UnkModelEntry2
-    unk_model_entry: UnkModelEntry = model_entry.model_refs[0].ref
-    models = model_entry.model_refs[1:]
-    models.extend(unk_model_entry.model_refs)
+    model_entry: LodMeshResource
+    unk_model_entry: MultiMeshResource = model_entry.parts[0].ref
+    models = model_entry.parts[1:]
+    models.extend(unk_model_entry.parts)
     for model in models:
         handle_model(model.ref, ar_set)
     pass

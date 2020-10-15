@@ -2,7 +2,7 @@ from enum import IntEnum
 from pathlib import Path
 from uuid import UUID
 
-from . import CoreDummy
+from .dummy import CoreDummy
 from .resource import Resource
 from ..core_entry_handler_manager import EntryTypeManager
 from ...core.stream_reference import StreamingDataSource
@@ -96,11 +96,8 @@ class TexturePixelFormat(IntEnum):
     BC7 = 75
 
 
-class Texture(Resource):
-    magic = 0xA664164D69FD2B38
-
+class TextureEntry:
     def __init__(self):
-        super().__init__()
         self.texture_type = ETextureType.Tex2D
         self.width = 0
         self.height = 0
@@ -120,8 +117,7 @@ class Texture(Resource):
         self.stream = StreamingDataSource()
         self.data_buffer = b''
 
-    def parse(self, reader: ByteIODS, core_file):
-        super().parse(reader, core_file)
+    def parse(self, reader: ByteIODS):
         self.texture_type = ETextureType(reader.read_uint8())
         reader.skip(1)
         self.width, self.height = reader.read_fmt('2H')
@@ -141,6 +137,7 @@ class Texture(Resource):
         if self.stream_size > 0:
             self.stream.parse(reader)
         self.data_buffer = reader.read_bytes(self.total_size)
+        return self
 
     def export(self, base_dir: str):
         base_dir = Path(base_dir)
@@ -167,26 +164,22 @@ class Texture(Resource):
                                       *pixel_info[1])
                 im.save(base_dir / (self.stream.stream_path + '.tga'))
 
-    def dump(self) -> dict:
-        out = {
-            'texture_type': self.texture_type.value,
-            'width': self.width,
-            'height': self.height,
-            'layer_count': self.layer_count,
-            'total_mips': self.total_mips,
-            'pixel_format': self.pixel_format.value,
-            'buffer_size': self.buffer_size,
-            'total_size': self.total_size,
-            'stream_size': self.stream_size,
-            'stream_mips': self.stream_mips,
-        }
-        if self.stream_size > 0:
-            out['stream_path'] = self.stream.stream_path
-        else:
-            import base64
-            out['data'] = base64.b64encode(self.data_buffer).decode('utf-8')
 
-        return out
+
+class Texture(Resource):
+    magic = 0xA664164D69FD2B38
+
+    def __init__(self):
+        super().__init__()
+        self.texture_item = TextureEntry()
+
+    def parse(self, reader: ByteIODS, core_file):
+        super().parse(reader, core_file)
+        self.texture_item.parse(reader)
+
+    def export(self, path: str):
+        self.texture_item.export(path)
+
 
 
 EntryTypeManager.register_handler(Texture)

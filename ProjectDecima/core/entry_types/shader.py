@@ -1,7 +1,8 @@
 from enum import IntEnum
 from typing import List
 
-from . import CoreDummy
+from .dummy import CoreDummy
+from .rtti_object import RTTIRefObject
 from ..core_entry_handler_manager import EntryTypeManager
 from ...utils.byte_io import ByteIO
 from ...utils.byte_io_ds import ByteIODS
@@ -33,7 +34,7 @@ class ShaderEntry:
         return self
 
 
-class CoreShader(CoreDummy):
+class CoreShader(RTTIRefObject):
     magic = 0x16bb69a9e5aa0d9e
 
     def __init__(self):
@@ -43,8 +44,7 @@ class CoreShader(CoreDummy):
         self.shaders: List[ShaderEntry] = []
 
     def parse(self, reader: ByteIODS, core_file):
-        self.header.parse(reader)
-        self.guid = reader.read_guid()
+        super().parse(reader, core_file)
         self.total_size = reader.read_uint32()
         self.unks_0 = reader.read_fmt(f'{28 // 4}I')
         shader_count = reader.read_uint32()

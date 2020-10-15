@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 from typing import List
 from uuid import UUID
 
@@ -24,9 +26,6 @@ class RTTIObject:
     def export(self, path: str):
         pass
 
-    def dump(self) -> dict:
-        return dict()
-
 
 EntryTypeManager.register_handler(RTTIObject)
 
@@ -42,6 +41,12 @@ class RTTIRefObject(RTTIObject):
         super().parse(reader, core_file)
         self.guid = reader.read_guid()
 
+    def export(self, path: str):
+        with (Path(path) / f'{self.guid}.ds_json').open('w') as f:
+            json.dump(self.dump(), f, indent=2)
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__} {self.guid}>'
 
 EntryTypeManager.register_handler(RTTIRefObject)
 
@@ -55,7 +60,7 @@ class RTTIRefObjectSet(RTTIRefObject):
 
     def parse(self, reader: ByteIODS, core_file):
         super().parse(reader, core_file)
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             ref = EntryReference()
             ref.parse(reader, core_file)
             self.objects.append(ref)

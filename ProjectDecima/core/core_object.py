@@ -1,4 +1,4 @@
-from ProjectDecima.core.entry_types.rtti_object import RTTIRefObject
+from .entry_types.rtti_object import RTTIRefObject
 
 
 class CoreObject(RTTIRefObject):

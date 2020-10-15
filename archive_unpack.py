@@ -3,6 +3,8 @@ import os
 from pathlib import Path
 from struct import pack
 
+import tqdm
+
 from ProjectDecima import ArchiveManager, Archive
 from ProjectDecima.utils.decryption import hash_string, decrypt_chunk_data
 from ProjectDecima.archive.archive import ArchiveEntry, ArchiveChunk
@@ -17,8 +19,8 @@ def dump_archive(archive_path: str, dump_path: str):
     archive.parse()
     os.makedirs(archive_dump_path, exist_ok=True)
     total = len(archive.entries)
-    for n, entry in enumerate(archive.entries):
-        print(f"Writing {n + 1}/{total} {entry.hash}.bin file")
+    for n, entry in tqdm.tqdm(enumerate(archive.entries), desc='Unpacking files', unit_scale=1, unit=' files',
+                              total=total):
         data = archive.get_file_data(entry)
         with open(archive_dump_path / f'{entry.hash}.bin', 'wb') as f:
             f.write(data)

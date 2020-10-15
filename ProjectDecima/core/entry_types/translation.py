@@ -5,11 +5,12 @@ from pathlib import Path
 from typing import List, Dict
 from uuid import UUID
 
-from . import CoreDummy
+from .dummy import CoreDummy
 from .resource import ResourceWithName, Resource
 from .rtti_object import RTTIRefObject
 from .sound import WwiseSimpleSoundResource
 from ..core_entry_handler_manager import EntryTypeManager
+from ..core_object import CoreObject
 from ..entry_reference import EntryReference
 from ..pod.strings import HashedString
 from ..stream_reference import StreamingDataSource
@@ -184,13 +185,7 @@ class LocalizedTextResource(Resource):
             self.flag = reader.read_uint8()
             return self
 
-        def dump(self):
-            return {
-                'class': self.__class__.__name__,
-                'string': self.string,
-                'comment': self.comment,
-                'flag': self.flag
-            }
+
 
         def __repr__(self):
             return f'<Localized string: "{self.string}" : {self.comment}>'
@@ -313,7 +308,7 @@ class LocalizedAnimationResource(Resource):
 
     def parse(self, reader: ByteIODS, core_file):
         super().parse(reader, core_file)
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             anim = AnimationResourceTranslation()
             anim.parse(reader, core_file)
             self.animations.append(anim)
@@ -355,8 +350,97 @@ class SkeletonAnimationResource(Resource):
         self.locomotion_delta_rotation = reader.read_fmt('4f')
         self.locomotion_delta_translation = reader.read_fmt('3f')
         self.events.parse(reader, core_file)
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             self.anim_event.append(reader.read_uint32())
 
 
 EntryTypeManager.register_handler(SkeletonAnimationResource)
+
+
+class LocalizedSoundPreset(CoreObject):
+    magic = 0xA2FE933E7E76C534
+
+    def __init__(self):
+        super().__init__()
+        self.def_volume = 0.0
+        self.def_lfe__volume = 0.0
+        self.wet_level = 0.0
+        self.max_dst = 0.0
+        self.min_dst = 0.0
+        self.subtitle_max_dst = 0.0
+        self.pressure_level = 0.0
+        self.attenuation_linearity = 0.0
+        self.attenuation_slope = 0.0
+        self.group = EntryReference()
+        self.uses_hdr_system = 0
+        self.affected_by_time_scale = 0
+        self.initial_rms = 0.0
+        self.wet_min_range = 0.0
+        self.wet_max_range = 0.0
+        self.wet_level_bias = 0.0
+        self.pan_modification_distance = 0.0
+        self.occlusion_factor = 0.0
+        self.obstruction_factor = 0.0
+        self.doppler_factor = 0.0
+        self.max_azimuth_delta = 0.0
+        self.proximity_radio = 0
+        self.should_also_pan_to_center = 0
+        self.sound_mix_state = EntryReference()
+        self.desired_encoding = EWaveDataEncodingHint.ATRAC9
+        self.encoding_quality = EWaveDataEncodingQuality.LossyHigh
+        self.obstruction_radius = 0.0
+        self.external_source_cookie = 0
+        self.flags = 0
+
+    def parse(self, reader: ByteIODS, core_file):
+        super().parse(reader, core_file)
+        self.def_volume = reader.read_float()
+        self.def_lfe__volume = reader.read_float()
+        self.wet_level = reader.read_float()
+        self.min_dst = reader.read_float()
+        self.max_dst = reader.read_float()
+        self.subtitle_max_dst = reader.read_float()
+        self.pressure_level = reader.read_float()
+        self.attenuation_linearity = reader.read_float()
+        self.attenuation_slope = reader.read_float()
+        self.group.parse(reader, core_file)
+        self.uses_hdr_system = reader.read_uint8()
+        self.affected_by_time_scale = reader.read_uint8()
+        self.initial_rms = reader.read_float()
+        self.wet_min_range = reader.read_float()
+        self.wet_max_range = reader.read_float()
+        self.wet_level_bias = reader.read_float()
+        self.pan_modification_distance = reader.read_float()
+        self.occlusion_factor = reader.read_float()
+        self.obstruction_factor = reader.read_float()
+        self.doppler_factor = reader.read_float()
+        self.max_azimuth_delta = reader.read_float()
+        self.proximity_radio = reader.read_uint8()
+        self.should_also_pan_to_center = reader.read_uint8()
+        self.sound_mix_state.parse(reader, core_file)
+        self.desired_encoding = EWaveDataEncodingHint(reader.read_uint32())
+        self.encoding_quality = EWaveDataEncodingQuality(reader.read_uint32())
+        self.obstruction_radius = reader.read_float()
+        self.external_source_cookie = reader.read_uint32()
+        self.flags = reader.read_uint8()
+
+
+EntryTypeManager.register_handler(LocalizedSoundPreset)
+
+
+class ESentenceGroupType(IntEnum):
+    Normal = 0
+    OneOfRandom = 1
+    OneOfInOrder = 2
+
+
+class SentenceGroupResource(Resource):
+    def __init__(self):
+        super().__init__()
+        self.type = ESentenceGroupType.Normal
+        self.sentences: List[EntryReference] = []
+
+    def parse(self, reader: ByteIODS, core_file):
+        super().parse(reader, core_file)
+        self.type = ESentenceGroupType(reader.read_uint32())
+        self.sentences = [reader.read_ref(core_file) for _ in reader.range32()]

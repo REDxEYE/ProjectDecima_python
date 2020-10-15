@@ -23,12 +23,6 @@ class ResourceWithName(Resource):
         super().parse(reader, core_file)
         self.name = reader.read_hashed_string()
 
-    def dump(self) -> dict:
-        return {
-            'class': self.__class__.__name__,
-            'name': self.name
-        }
-
 
 EntryTypeManager.register_handler(ResourceWithName)
 
@@ -44,11 +38,6 @@ class ResourceWithNameHash(Resource):
         super().parse(reader, core_file)
         self.name_hash = reader.read_uint32()
 
-    def dump(self) -> dict:
-        return {
-            'class': self.__class__.__name__,
-            'name_hash': self.name_hash
-        }
 
 
 EntryTypeManager.register_handler(ResourceWithNameHash)

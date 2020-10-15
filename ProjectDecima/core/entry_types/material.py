@@ -4,7 +4,7 @@ from enum import IntEnum
 from typing import List
 from uuid import UUID
 
-from . import CoreDummy
+from .dummy import CoreDummy
 from .resource import Resource
 from ..core_entry_handler_manager import EntryTypeManager
 from ..entry_reference import EntryReference
@@ -94,12 +94,6 @@ class ShaderSamplerBinding:
     def parse(self, reader: ByteIODS):
         self.binding_name_hash, self.sampler_data = reader.read_fmt('2I')
 
-    def dump(self):
-        return {
-            'binding_name_hash': self.binding_name_hash,
-            'sampler_data': self.sampler_data,
-        }
-
 
 class SamplerBindingWithHandle(ShaderSamplerBinding):
     def __init__(self):
@@ -109,13 +103,6 @@ class SamplerBindingWithHandle(ShaderSamplerBinding):
     def parse(self, reader: ByteIODS):
         super().parse(reader)
         self.sampler_binding_handle = reader.read_uint64()
-
-    def dump(self):
-        out = super().dump()
-        out.update({
-            'sampler_binding_handle': self.sampler_binding_handle
-        })
-        return out
 
 
 class ShaderTextureBinding:
@@ -130,15 +117,6 @@ class ShaderTextureBinding:
         (self.binding_name_hash, self.swizzle_hash, self.sampler_name_hash, self.packed_data) = reader.read_fmt('4I')
         self.texture.parse(reader, core_file)
 
-    def dump(self):
-        return {
-            'binding_name_hash': self.binding_name_hash,
-            'swizzle_hash': self.swizzle_hash,
-            'sampler_name_hash': self.sampler_name_hash,
-            'packed_data': self.packed_data,
-            'texture': self.texture.dump(),
-        }
-
 
 class TextureBindingWithHandle(ShaderTextureBinding):
     def __init__(self):
@@ -150,14 +128,6 @@ class TextureBindingWithHandle(ShaderTextureBinding):
         super().parse(reader, core_file)
         self.texture_binding_handle = reader.read_uint64()
         self.swizzle_binding_handle = reader.read_uint64()
-
-    def dump(self):
-        out = super().dump()
-        out.update({
-            'texture_binding_handle': self.texture_binding_handle,
-            'swizzle_binding_handle': self.swizzle_binding_handle,
-        })
-        return out
 
 
 class EShaderVariableType(IntEnum):
@@ -213,17 +183,6 @@ class ShaderVariableBinding:
         self.type = EShaderVariableType(reader.read_uint8())
         self.animator.parse(reader, core_file)
 
-    def dump(self):
-        import base64
-        return {
-            'binding_name_hash': self.binding_name_hash,
-            'variable_id_hash': self.variable_id_hash,
-            'type': self.type.value,
-            'variable_data': base64.b64encode(self.variable_data).decode('utf-8'),
-            'animator': self.animator.dump(),
-
-        }
-
 
 class VariableBindingWithHandle(ShaderVariableBinding):
     def __init__(self):
@@ -233,13 +192,6 @@ class VariableBindingWithHandle(ShaderVariableBinding):
     def parse(self, reader: ByteIODS, core_file):
         super().parse(reader, core_file)
         self.var_binding_handle = reader.read_uint64()
-
-    def dump(self):
-        out = super().dump()
-        out.update({
-            'var_binding_handle': self.var_binding_handle,
-        })
-        return out
 
 
 class SRTBindingCache:
@@ -256,15 +208,6 @@ class SRTBindingCache:
         self.binding_data_indices = reader.read_fmt(f'{array_size}H')
         array_size = reader.read_int32()
         self.srt_entry_handles = reader.read_fmt(f'{array_size}Q')
-
-    def dump(self):
-        return {
-            'texture_binding_mask': self.texture_binding_mask,
-            'binding_data_mask': self.binding_data_mask,
-            'srt_entries_mask': self.srt_entries_mask,
-            'binding_data_indices': self.binding_data_indices,
-            'srt_entry_handles': self.srt_entry_handles,
-        }
 
 
 class RenderTechnique:
@@ -318,26 +261,6 @@ class RenderTechnique:
         self.id = reader.read_uint64()
         self.force_lod_fade = reader.read_uint8()
 
-    def dump(self):
-        import base64
-        return {
-            'state': base64.b64encode(self.state).decode('utf-8'),
-            'srt_binding_cache': self.srt_binding_cache.dump(),
-            'type': self.type.value,
-            'gpu_skinned': self.gpu_skinned,
-            'write_global_vertex_cache': self.write_global_vertex_cache,
-            'camera_facing': self.camera_facing,
-            'initially_enabled': self.initially_enabled,
-            'material_layer_id': self.material_layer_id,
-            'sampler_binding': [bind.dump() for bind in self.sampler_binding],
-            'texture_binding': [bind.dump() for bind in self.texture_binding],
-            'variable_binding': [bind.dump() for bind in self.variable_binding],
-            'shader': self.shader.dump(),
-            'id': self.id,
-            'force_lod_fade': self.force_lod_fade,
-
-        }
-
 
 class RenderTechniqueSet:
     def __init__(self):
@@ -360,15 +283,6 @@ class RenderTechniqueSet:
         self.init_enabled_techniques_mask = reader.read_int32()
 
         return self
-
-    def dump(self):
-        return {
-            'render_techniques': [rt.dump() for rt in self.render_techniques],
-            'type': self.type.value,
-            'effect_type': self.effect_type.value,
-            'available_techniques_mask': self.available_techniques_mask,
-            'init_enabled_techniques_mask': self.init_enabled_techniques_mask,
-        }
 
 
 class RenderEffectResource(Resource):
@@ -396,15 +310,6 @@ class RenderEffectResource(Resource):
         reader.skip(2)
         self.env_interaction_targets = EnvironmentInteractionTargets(reader.read_uint32())
 
-    def dump(self) -> dict:
-        return {
-            'object_attribute_animator_resource': self.object_attribute_animator_resource.dump(),
-            'technique_sets': [ts.dump() for ts in self.technique_sets],
-            'sort_mode': self.sort_mode.value,
-            'sort_order': self.sort_order.value,
-            'render_effect': self.render_effect.value,
-            'env_interaction_targets': self.env_interaction_targets.value,
-        }
 
 
 EntryTypeManager.register_handler(RenderEffectResource)
@@ -423,12 +328,6 @@ class ShadingGroup(Resource):
         self.render_effect.parse(reader, core_file)
         self.material_type = reader.read_uint8()
 
-    def dump(self):
-        return {
-            'class': self.class_name,
-            'render_effect': self.render_effect.dump(),
-            'material_type': self.material_type,
-        }
 
 
 EntryTypeManager.register_handler(ShadingGroup)

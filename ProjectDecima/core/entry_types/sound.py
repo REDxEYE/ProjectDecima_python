@@ -2,7 +2,7 @@ from enum import IntEnum
 from pathlib import Path
 from typing import List, Dict, Type
 
-from . import CoreDummy
+from .dummy import CoreDummy
 from .resource import ResourceWithName
 from ..core_entry_handler_manager import EntryTypeManager
 from ..core_object import CoreObject
@@ -239,7 +239,7 @@ class SoundGroupList(CoreObject):
 
     def parse(self, reader: ByteIODS, core_file):
         super().parse(reader, core_file)
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             ref = EntryReference()
             ref.parse(reader, core_file)
             self.groups.append(ref)

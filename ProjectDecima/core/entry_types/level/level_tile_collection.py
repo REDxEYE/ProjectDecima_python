@@ -1,6 +1,6 @@
 from typing import List
 
-from .. import CoreDummy
+from ..dummy import CoreDummy
 from ..resource import Resource
 from ...core_entry_handler_manager import EntryTypeManager
 from ...entry_reference import EntryReference
@@ -18,14 +18,14 @@ class StreamingStrategyResource(Resource):
 
     def parse(self, reader: ByteIODS, core_file):
         super().parse(reader, core_file)
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             string = reader.read_hashed_string()
             self.blacklisted_types.append(string)
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             string = reader.read_hashed_string()
             self.whitelisted_types.append(string)
             self.blacklisted_types.append(string)
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             ref = EntryReference()
             ref.parse(reader, core_file)
             self.whitelisted_objects.append(ref)
@@ -34,7 +34,7 @@ class StreamingStrategyResource(Resource):
 EntryTypeManager.register_handler(StreamingStrategyResource)
 
 
-class TileBasedStreamingStrategyResource(CoreDummy):
+class TileBasedStreamingStrategyResource(StreamingStrategyResource):
     magic = 0x3c0d150db02d8c80
 
     def __init__(self):

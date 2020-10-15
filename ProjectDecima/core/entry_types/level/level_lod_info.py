@@ -1,7 +1,7 @@
 from enum import IntEnum
 from typing import List
 
-from .. import CoreDummy
+from ..dummy import CoreDummy
 from ...core_entry_handler_manager import EntryTypeManager
 from ...core_object import CoreObject
 from ...entry_reference import EntryReference

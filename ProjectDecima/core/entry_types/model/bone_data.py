@@ -1,7 +1,7 @@
 from uuid import UUID
 
-from ProjectDecima.core.entry_types import CoreDummy
-from ProjectDecima.core.entry_types.resource import Resource
+from ..dummy import CoreDummy
+from ..resource import Resource
 from ProjectDecima.core.core_entry_handler_manager import EntryTypeManager
 from ProjectDecima.utils.byte_io_ds import ByteIODS
 
@@ -23,12 +23,6 @@ class SkinnedMeshIndexedJointBindings(Resource):
         self.inv_bind_matrices = [reader.read_fmt('16f') for _ in range(matrix_count)]
         self.data_hash = reader.read_guid()
 
-    def dump(self) -> dict:
-        return {
-            'inv_bind_matrices': self.inv_bind_matrices,
-            'joint_indices': self.joint_indices,
-            'data_hash': str(self.data_hash),
-        }
 
 
 EntryTypeManager.register_handler(SkinnedMeshIndexedJointBindings)

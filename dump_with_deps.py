@@ -3,8 +3,9 @@ from pathlib import Path
 from typing import List
 
 from ProjectDecima import ArchiveManager, CoreFile, Archive
+from ProjectDecima.core.core_entry_handler_manager import EntryTypeManager
 from ProjectDecima.core.entry_reference import EntryReference, LoadMethod
-from ProjectDecima.core.stream_reference import StreamReference
+from ProjectDecima.core.stream_reference import StreamingDataSource
 
 dumped_files = []
 
@@ -33,9 +34,9 @@ def dump_core_file(dump_path: Path, core_file: CoreFile):
                 v: EntryReference
                 if v._core_file is not None and v.load_method in [LoadMethod.ImmediateCoreFile, LoadMethod.CoreFile]:
                     dump_core_file(dump_dir, v._core_file)
-            elif isinstance(v, StreamReference):
-                v: StreamReference
-                if v.mempool_tag.int==0:
+            elif isinstance(v, StreamingDataSource):
+                v: StreamingDataSource
+                if v.mempool_tag.int == 0:
                     continue
                 os.makedirs((dump_path / str(v.stream_path)).parent, exist_ok=True)
                 print(f"Writing {dump_path / str(v.stream_path)}.core.stream stream")
@@ -43,7 +44,7 @@ def dump_core_file(dump_path: Path, core_file: CoreFile):
                     continue
                 else:
                     dumped_files.append(v)
-                    with (dump_path / (str(v.stream_path)+'.core.stream')).open('wb') as f:
+                    with (dump_path / (str(v.stream_path) + '.core.stream')).open('wb') as f:
                         v.stream_reader.seek(0)
                         f.write(v.stream_reader.read_bytes(-1))
             elif isinstance(v, list) and len(v) > 0 and isinstance(v[0], EntryReference):
@@ -55,6 +56,7 @@ def dump_core_file(dump_path: Path, core_file: CoreFile):
 
 
 if __name__ == '__main__':
+    EntryTypeManager.load_handlers('./ProjectDecima/core/entry_types/')
     archive_dir = Path(input('Folder with archives: ') or r'F:\SteamLibrary\steamapps\common\Death Stranding\data')
     print(f'Loading archives from "{archive_dir}"')
     dump_dir = Path(input('Output path: ') or r'F:\SteamLibrary\steamapps\common\Death Stranding\dump')
@@ -64,7 +66,8 @@ if __name__ == '__main__':
 
     while 1:
         core_file_path = input('Core file path: ')
-        core_file_path = core_file_path.replace('\\','/')
+        core_file_path = core_file_path.replace('\\', '/')
+
         if not core_file_path:
             break
         file = ar_set.queue_file(core_file_path)

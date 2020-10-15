@@ -1,9 +1,9 @@
 from typing import List
 
-from ProjectDecima.core.core_entry_handler_manager import EntryTypeManager
-from ProjectDecima.core.entry_reference import EntryReference
-from ProjectDecima.core.entry_types.propetry import Property
-from ProjectDecima.core.entry_types.resource import Resource
+from ..core_entry_handler_manager import EntryTypeManager
+from ..entry_reference import EntryReference
+from ..entry_types.propetry import Property
+from ..entry_types.resource import Resource
 from ProjectDecima.utils.byte_io_ds import ByteIODS
 
 
@@ -32,7 +32,7 @@ class EnumFactDefinition(Resource):
 
     def parse(self, reader: ByteIODS, core_file):
         super().parse(reader, core_file)
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             ref = EntryReference()
             ref.parse(reader, core_file)
             self.enum_values.append(ref)

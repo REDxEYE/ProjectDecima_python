@@ -4,6 +4,7 @@ from uuid import UUID
 
 from .core_entry_handler_manager import EntryTypeManager
 from .entry_reference import EntryReference
+from .entry_types.dummy import CoreDummy
 from ..utils.byte_io_ds import ByteIODS
 
 from .entry_types import *

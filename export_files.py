@@ -2,9 +2,12 @@ import os
 from pathlib import Path
 
 from ProjectDecima import ArchiveManager
+from ProjectDecima.core.core_entry_handler_manager import EntryTypeManager
+from ProjectDecima.utils.dsjson_serializer import DSJsonSerializer
 
 
 def main():
+    EntryTypeManager.load_handlers('./ProjectDecima/core/entry_types/')
     archive_dir = Path(input('Folder with archives: ') or r'F:\SteamLibrary\steamapps\common\Death Stranding\data')
     print(f'Loading archives from "{archive_dir}"')
     dump_dir = Path(input('Output path: ') or r'F:\SteamLibrary\steamapps\common\Death Stranding\dump')
@@ -23,9 +26,15 @@ def main():
         for entry in file.entries:
             if not entry.exportable:
                 continue
-            entry_dump_path = file_dump_path
-            os.makedirs(entry_dump_path, exist_ok=True)
-            entry.export(entry_dump_path)
+            DSJsonSerializer.begin()
+            DSJsonSerializer.add_object(entry)
+            with file_dump_path.with_suffix('.ds_json').open('w',encoding='utf-8') as f:
+                import json
+                json.dump(DSJsonSerializer.finalize(), f, indent=1, ensure_ascii=False)
+
+            # entry_dump_path = file_dump_path
+            # os.makedirs(entry_dump_path, exist_ok=True)
+            # entry.export(entry_dump_path)
 
 
 if __name__ == '__main__':

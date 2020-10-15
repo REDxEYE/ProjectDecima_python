@@ -1,26 +1,22 @@
 from pathlib import Path
 from uuid import UUID
 
+from .rtti_object import RTTIObject, RTTIRefObject
 from ..core_entry_handler_manager import EntryTypeManager
 from ...utils.byte_io_ds import ByteIODS
 from ...core.pod.core_header import CoreHeader
 
 
-class CoreDummy:
+class CoreDummy(RTTIRefObject):
     magic = 0xFFFF_FFFF_FFFF_FFFF
     exportable = False
 
     def __init__(self, ):
-        self.header = CoreHeader()
-        self.guid = UUID(int=0)
+        super().__init__()
 
     def parse(self, reader: ByteIODS, core_file):
-        self.header.parse(reader)
-        self.guid = reader.read_guid()
+        super().parse(reader, core_file)
         reader.skip(self.header.size - 16)
-
-    def dump(self):
-        pass
 
     def __repr__(self):
         return f'<{self.__class__.__name__} {self.guid}>'
@@ -56,10 +52,6 @@ class PhysicsSimpleShapeResource(CoreDummy):
     magic = 0x71F9F6716E87D88D
 
 
-class ArtPartsCoverModelResource(CoreDummy):
-    magic = 0x8FB6D1083030A794
-
-
 class DSRenderEffectSwapperElement(CoreDummy):
     magic = 0xE5A008AAA3BDDACA
 
@@ -85,7 +77,7 @@ class PhysicsCollisionResource(CoreDummy_4):
 
 
 EntryTypeManager.register_handler(PhysicsSimpleShapeResource)
-EntryTypeManager.register_handler(ArtPartsCoverModelResource)
+
 EntryTypeManager.register_handler(DSRenderEffectSwapperElement)
 EntryTypeManager.register_handler(DSRenderEffectSwapper)
 EntryTypeManager.register_handler(PhysicsCollisionInstance)

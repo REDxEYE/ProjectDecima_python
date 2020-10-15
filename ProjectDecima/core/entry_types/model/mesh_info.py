@@ -2,8 +2,8 @@ from enum import IntEnum
 from typing import List
 from uuid import UUID
 
-from ProjectDecima.core.entry_types import CoreDummy
-from ProjectDecima.core.entry_types.resource import Resource
+from ..dummy import CoreDummy
+from ..resource import Resource
 from ProjectDecima.core.core_entry_handler_manager import EntryTypeManager
 from ProjectDecima.core.pod.strings import HashedString
 from ProjectDecima.core.stream_reference import StreamingDataSource
@@ -64,13 +64,7 @@ class IndexArrayResource(Resource):
             assert self.is_streaming in [0, 1]
             self.resource_guid = reader.read_guid()
 
-    def dump(self):
-        return {
-            'class': self.class_name,
-            'count': self.indices_count,
-            'type': self.format.value,
-            'streaming': self.is_streaming,
-        }
+
 
 
 EntryTypeManager.register_handler(IndexArrayResource)
@@ -120,14 +114,7 @@ class VertexSkin:
         self.normal = reader.read_fmt('3B')
         self.bone = reader.read_fmt('8H')
 
-    def dump(self):
-        return {
-            'class': self.__class__.__name__,
-            'pos': self.pos,
-            'weight': self.weight,
-            'normal': self.normal,
-            'bone': self.bone,
-        }
+
 
 
 class VertexSkinNBT(VertexSkin):
@@ -140,12 +127,6 @@ class VertexSkinNBT(VertexSkin):
         super().parse(reader)
         self.bi_tangent = reader.read_fmt('3B')
         self.tangent = reader.read_fmt('3B')
-
-    def dump(self):
-        res = self.dump()
-        res['bi_tangent'] = self.bi_tangent
-        res['tangent'] = self.tangent
-        return res
 
 
 class PrimitiveSkinInfo:
@@ -166,27 +147,15 @@ class PrimitiveSkinInfo:
         self.vertex_count = reader.read_uint32()
         self.vertex_compute_nbt_count = reader.read_uint32()
         self.vtx_tri_list_buffer.parse(reader, core_file)
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             skin = VertexSkin()
             skin.parse(reader)
             self.vertices_skin.append(skin)
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             skin = VertexSkinNBT()
             skin.parse(reader)
             self.vertices_skin_nbt.append(skin)
 
-    def dump(self):
-        return {
-            'class': self.__class__.__name__,
-            'type': self.type.value,
-            'skin_vtx_type': self.skin_vtx_type.value,
-            'blend_shape_mask': self.blend_shape_mask,
-            'vertex_count': self.vertex_count,
-            'vertex_compute_nbt_count': self.vertex_compute_nbt_count,
-            'vtx_tri_list_buffer': self.vtx_tri_list_buffer.dump(),
-            'vertices_skin': [skin.dump() for skin in self.vertices_skin],
-            'vertices_skin_nbt': [skin.dump() for skin in self.vertices_skin_nbt],
-        }
 
 
 class VertexDeltaDeformation:
@@ -200,13 +169,6 @@ class VertexDeltaDeformation:
         self.nrm = reader.read_fmt('3B')
         self.vertex_index = reader.read_uint8()
 
-    def dump(self):
-        return {
-            'class': self.__class__.__name__,
-            'pos': self.pos,
-            'nrm': self.nrm,
-            'vertex_index': self.vertex_index,
-        }
 
 
 class BlendTargetDeformation:
@@ -216,25 +178,14 @@ class BlendTargetDeformation:
 
     def parse(self, reader):
         self.name = reader.read_hashed_string()
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             def_array = []
-            for _ in range(reader.read_uint32()):
+            for _ in reader.range32():
                 deform = VertexDeltaDeformation()
                 deform.parse(reader)
                 def_array.append(deform)
             self.deformations.append(def_array)
 
-    def dump(self):
-        out = {
-            'name': self.name,
-            'deformations': [],
-        }
-        for def_array in self.deformations:
-            tmp = []
-            for deform in def_array:
-                tmp.append(deform.dump())
-            out['deformations'].append(tmp)
-        return out
 
 
 class RegularSkinnedMeshResourceSkinInfo(Resource):
@@ -247,21 +198,16 @@ class RegularSkinnedMeshResourceSkinInfo(Resource):
 
     def parse(self, reader: ByteIODS, core_file):
         super().parse(reader, core_file)
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             part = PrimitiveSkinInfo()
             part.parse(reader, core_file)
             self.parts.append(part)
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             target = BlendTargetDeformation()
             target.parse(reader)
             self.blend_target_deforms.append(target)
 
-    def dump(self):
-        return {
-            'class': self.class_name,
-            'parts': [part.dump() for part in self.parts],
-            'blend_target_deforms': [target.dump() for target in self.blend_target_deforms],
-        }
+
 
 
 EntryTypeManager.register_handler(RegularSkinnedMeshResourceSkinInfo)
@@ -272,35 +218,28 @@ class DataBufferResource(Resource):
 
     def __init__(self):
         super().__init__()
-        self.buffer_count = 0
+        self.buffer_element_count = 0
         self.is_streaming = 0
         self.flags = 0
         self.format = EDataBufferFormat.Invalid
         self.buffer_stride = 0
 
-        self.mesh_stream = StreamingDataSource()
+        self.data_stream = StreamingDataSource()
+        self.data_buffer = ByteIODS()
 
     def parse(self, reader: ByteIODS, core_file):
         super().parse(reader, core_file)
-        self.buffer_count = reader.read_uint32()
-        if self.buffer_count > 0:
+        self.buffer_element_count = reader.read_uint32()
+        if self.buffer_element_count > 0:
             self.is_streaming = reader.read_uint32()
             self.flags = reader.read_uint32()
             self.format = EDataBufferFormat(reader.read_uint32())
             self.buffer_stride = reader.read_uint32()
-        self.mesh_stream.parse(reader)
-
-    def dump(self):
-        return {
-            'class': self.class_name,
-            'buffer_count': self.buffer_count,
-            'is_streaming': self.is_streaming,
-            'flags': self.flags,
-            'format': self.format.value,
-            'buffer_stride': self.buffer_stride,
-            'mesh_stream': self.mesh_stream.dump()
-
-        }
+        if self.is_streaming:
+            self.data_stream.parse(reader)
+        else:
+            self.data_buffer.write_bytes(reader.read_bytes(self.buffer_stride * self.buffer_element_count))
+            self.data_buffer.seek(0)
 
 
 EntryTypeManager.register_handler(DataBufferResource)
@@ -331,17 +270,6 @@ class PrimitiveResource(Resource):
         self.index_end = reader.read_uint32()
         self.hash = reader.read_uint32()
 
-    def dump(self):
-        return {
-            'class': self.class_name,
-            'vertex_array': self.vertex_array.dump(),
-            'index_array': self.index_array.dump(),
-            'index_start': self.start_index,
-            'bbox': self.bbox,
-            # 'skd_tree': self.skd_tree.dump(),
-            'index_end': self.index_end,
-            'hash': self.hash,
-        }
 
 
 EntryTypeManager.register_handler(PrimitiveResource)
@@ -425,18 +353,7 @@ class VertexStream:
             ))
         self.guid_0 = reader.read_guid()
 
-    def dump(self):
-        return {
-            'class': self.__class__.__name__,
-            'stride': self.stride,
-            'flags': self.flags,
-            'guid_0': str(self.guid_0),
-            'elements': [
-                {'offset': elem[0],
-                 'element_type': elem[1].value,
-                 'slot_count': elem[2],
-                 'type': elem[3].value} for elem in self.element_desc],
-        }
+
 
 
 class VertexArrayResource(Resource):
@@ -459,13 +376,7 @@ class VertexArrayResource(Resource):
             vertex_block_info.parse(reader)
             self.vertex_streams.append(vertex_block_info)
 
-    def dump(self):
-        return {
-            'class': self.class_name,
-            'count': self.vertex_count,
-            'streams': [block.dump() for block in self.vertex_streams],
-            'streaming': self.is_streaming,
-        }
+
 
 
 EntryTypeManager.register_handler(VertexArrayResource)

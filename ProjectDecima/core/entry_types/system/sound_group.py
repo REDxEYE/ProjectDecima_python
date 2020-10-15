@@ -2,7 +2,7 @@ from enum import IntEnum
 from pathlib import Path
 from typing import List, Dict, Type
 
-from .. import CoreDummy
+from ..dummy import CoreDummy
 from ..resource import Resource
 from ...core_entry_handler_manager import EntryTypeManager
 from ...entry_reference import EntryReference

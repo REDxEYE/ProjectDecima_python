@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Dict, Type
 
-from .. import CoreDummy
+from ..dummy import CoreDummy
 from ..fact import Fact
 from ..resource import ResourceWithName
 from ...core_entry_handler_manager import EntryTypeManager

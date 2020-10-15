@@ -36,19 +36,6 @@ class StreamingDataSource:
         else:
             raise Exception('No archive manager instance were provided')
 
-    def dump(self):
-        import base64
-        self.stream_reader.seek(0)
-        return {
-            'class': self.__class__.__name__,
-            'stream_path': self.stream_path,
-            'mempool_tag': str(self.mempool_tag),
-            'channel': self.channel,
-            'offset': self.offset,
-            'size': self.size,
-            'buffer': base64.b64encode(self.stream_reader.read_bytes(-1)).decode('utf-8'),
-
-        }
 
     def __bool__(self):
         return self.stream_reader.size() != 0

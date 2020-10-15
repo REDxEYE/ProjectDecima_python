@@ -3,8 +3,8 @@ from typing import List
 
 from ProjectDecima.core.core_entry_handler_manager import EntryTypeManager
 from ProjectDecima.core.entry_reference import EntryReference
-from ProjectDecima.core.entry_types.resource import Resource
-from ProjectDecima.core.entry_types.rtti_object import EntityComponentResource
+from ..resource import Resource
+from ..rtti_object import EntityComponentResource
 from ProjectDecima.core.pod.strings import HashedString
 from ProjectDecima.core.stream_reference import StreamingDataSource
 from ProjectDecima.utils.byte_io_ds import ByteIODS
@@ -27,16 +27,7 @@ class MeshHierarchyInfo:
          self.lod_mesh_count,
          self.packed_data) = reader.read_fmt('2I4H')
 
-    def dump(self):
-        return {
-            'class': self.__class__.__name__,
-            'mit_node_size': self.mit_node_size,
-            'primitive_count': self.primitive_count,
-            'mesh_count': self.mesh_count,
-            'static_mesh_count': self.static_mesh_count,
-            'lod_mesh_count': self.lod_mesh_count,
-            'packed_data': self.packed_data,
-        }
+
 
 
 class MeshResourceBase(Resource):
@@ -56,16 +47,7 @@ class MeshResourceBase(Resource):
         self.cull_info = reader.read_uint32()
         self.mesh_hierarchy_info.parse(reader)
 
-    def dump(self):
-        out = super().dump()
-        out.update({
-            'class': self.class_name,
-            'static_data_block_size': self.static_data_block_size,
-            'bounding_box': self.bounding_box,
-            'cull_info': self.cull_info,
-            'mesh_hierarchy_info': self.mesh_hierarchy_info.dump(),
-        })
-        return out
+
 
 
 EntryTypeManager.register_handler(MeshResourceBase)
@@ -99,31 +81,20 @@ class ModelResource(EntityComponentResource):
 
     def parse(self, reader: ByteIODS, core_file):
         super().parse(reader, core_file)
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             ref = EntryReference()
             ref.parse(reader, core_file)
             self.model_part_resources.append(ref)
         self.art_parts_resources.parse(reader, core_file)
         self.view_layer = EViewLayer(reader.read_uint32())
         self.active_view = EActiveView(reader.read_int32())
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             ref = EntryReference()
             ref.parse(reader, core_file)
             self.helpers.append(ref)
         self.helper_name = reader.read_hashed_string()
 
-    def dump(self):
-        out = super().dump()
-        out.update({
-            'class': self.class_name,
-            'model_part_resources': [part.dump() for part in self.model_part_resources],
-            'art_parts_resources': self.art_parts_resources.dump(),
-            'view_layer': self.view_layer.value,
-            'active_view': self.active_view.value,
-            'helpers': [helper.dump() for helper in self.helpers],
-            'helper_name': self.helper_name,
-        })
-        return out
+
 
 
 class SkinnedModelResource(ModelResource):
@@ -157,14 +128,6 @@ class SkinnedMeshResource(MeshResourceBase):
         self.skeleton.parse(reader, core_file)
         self.orientation_helpers.parse(reader, core_file)
 
-    def dump(self):
-        out = super().dump()
-        out.update({
-            'class': self.class_name,
-            'skeleton': self.skeleton.dump(),
-            'orientation_helpers': self.orientation_helpers.dump(),
-        })
-        return out
 
 
 EntryTypeManager.register_handler(SkinnedMeshResource)
@@ -187,16 +150,7 @@ class RegularSkinnedMeshResourceBase(SkinnedMeshResource):
         self.skinned_mesh_joints_bindings.parse(reader, core_file)
         self.skinned_mesh_bone_bboxes.parse(reader, core_file)
 
-    def dump(self):
-        out = super().dump()
-        out.update({
-            'class': self.class_name,
-            'draw_flags': self.draw_flags,
-            'deformer_type': self.deformer_type.value,
-            'skinned_mesh_joints_bindings': self.skinned_mesh_joints_bindings.dump(),
-            'skinned_mesh_bone_bboxes': self.skinned_mesh_bone_bboxes.dump(),
-        })
-        return out
+
 
 
 EntryTypeManager.register_handler(RegularSkinnedMeshResourceBase)
@@ -221,28 +175,17 @@ class RegularSkinnedMeshResource(RegularSkinnedMeshResourceBase):
         self.position_bounds_scale = reader.read_fmt('3f')
         self.position_bounds_offset = reader.read_fmt('3f')
         self.skin_info.parse(reader, core_file)
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             ref = EntryReference()
             ref.parse(reader, core_file)
             self.primitives.append(ref)
-        for _ in range(reader.read_uint32()):
+        for _ in reader.range32():
             ref = EntryReference()
             ref.parse(reader, core_file)
             self.shading_groups.append(ref)
         self.render_effect_swapper.parse(reader, core_file)
         self.mesh_stream.parse(reader)
 
-    def dump(self):
-        out = super().dump()
-        out.update({
-            'class': self.class_name,
-            'position_bounds_scale': self.position_bounds_scale,
-            'position_bounds_offset': self.position_bounds_offset,
-            'mesh_stream': self.mesh_stream.dump(),
-            'primitives': [prim.dump() for prim in self.primitives],
-            'materials': [shd.dump() for shd in self.shading_groups],
-        })
-        return out
 
 
 EntryTypeManager.register_handler(RegularSkinnedMeshResource)
