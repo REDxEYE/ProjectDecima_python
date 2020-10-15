@@ -151,7 +151,7 @@ class ArchiveEntry:
     def decrypt(self, data):
         input_key = [pack('4I', data[1], encryption_key_1[1], encryption_key_1[2], encryption_key_1[3]),
                      pack('4I', data[7], encryption_key_1[1], encryption_key_1[2], encryption_key_1[3])]
-        data = np.array(data, dtype=np.uint32)
+        data = np.array(data, dtype=np.uint32, copy=False)
         data = decrypt(input_key, data)
 
         (self.entry_id, self.key_0, self.hash, self.offset, self.size, self.key_1) = unpack('2I2Q2I', pack('8I', *data))
