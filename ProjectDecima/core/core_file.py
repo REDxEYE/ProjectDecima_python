@@ -5,6 +5,7 @@ from uuid import UUID
 from .core_entry_handler_manager import EntryTypeManager
 from .entry_reference import EntryReference
 from .entry_types.dummy import CoreDummy
+from .entry_types.rtti_object import RTTIRefObject
 from ..utils.byte_io_ds import ByteIODS
 
 from .entry_types import *
@@ -30,7 +31,7 @@ class CoreFile:
             self.filepath = Path(filepath)
             self.reader = ByteIODS(filepath)
         self.entries: List[CoreDummy] = []
-        self._entry_by_guid: Dict[UUID, CoreDummy] = {}
+        self._entry_by_guid: Dict[UUID, RTTIRefObject] = {}
         self.local_links: List[EntryReference] = []
 
     def get_entries_by_type(self, entry_type):
