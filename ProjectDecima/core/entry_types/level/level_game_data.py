@@ -44,6 +44,7 @@ EntryTypeManager.register_handler(LevelData)
 
 class LevelDataGame(LevelData):
     magic = 0xDBDC689E46C7F160
+    exportable = True
 
     def __init__(self):
         super().__init__()

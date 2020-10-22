@@ -1,18 +1,26 @@
+import os
 from enum import IntEnum
+from pathlib import Path
 from uuid import UUID
 
 from .byte_io import ByteIO
 from ..core.entry_reference import EntryReference
 from ..core.entry_types.rtti_object import RTTIRefObject
+from ..core.entry_types.texture import Texture, TextureEntry, ETextureType
 from ..core.pod.strings import HashedString, UnHashedString
+from ..core.stream_reference import StreamingDataSource
 
 
 class DSJsonSerializer:
-    __storage = {'entry_points': [], 'objects': {}}
+    __storage = {'dump_path': '', 'entry_points': [], 'objects': {}}
+    __filepath = Path()
+    __dump_path = Path()
 
     @classmethod
-    def begin(cls):
-        cls.__storage = {'objects': {}, 'entry_points': []}
+    def begin(cls, dump_path, output_path):
+        cls.__storage = {'dump_path': str(dump_path), 'entry_points': [], 'objects': {}}
+        cls.__filepath = Path(output_path)
+        cls.__dump_path = Path(dump_path)
 
     @classmethod
     def add_object(cls, rtti_object: RTTIRefObject):
@@ -38,8 +46,50 @@ class DSJsonSerializer:
                 value.seek(0)
                 add({
                     'data': base64.b64encode(value.read_bytes(-1)).decode('utf-8'),
+                    'compression': 'zlib',
                     'size': value.tell()
                 })
+
+            elif isinstance(value, StreamingDataSource):
+                if value.stream_path:
+                    stream_path = value.stream_path
+                    if not stream_path.endswith('.core.stream'):
+                        stream_path += '.core.stream'
+                    os.makedirs((cls.__dump_path / stream_path).parent, exist_ok=True)
+                    with (cls.__dump_path / stream_path).open('wb') as f:
+                        value.stream_reader.seek(0)
+                        f.write(value.stream_reader.read_bytes(-1))
+                add({
+                    'stream_path': value.stream_path,
+                    'size': value.size,
+                    'offset': value.offset,
+                    'channel': value.channel,
+                })
+
+            elif isinstance(value, Texture):
+                value: Texture
+                texture_entry = value.texture_item
+                dump_path: str = cls.__storage['dump_path']
+                if value.streamed:
+                    texture_entry.export(dump_path)
+                    texture_path = Path(dump_path) / texture_entry.stream.stream_path
+                else:
+                    texture_entry.export(Path(cls.__filepath).parent)
+                    texture_path = Path(cls.__filepath).parent / str(texture_entry.uuid)
+                tmp = {
+                    'path': texture_path,
+                    'width': texture_entry.width,
+                    'height': texture_entry.height,
+                    'pixel_format': texture_entry.pixel_format,
+                    'type': texture_entry.texture_type,
+                }
+                if texture_entry.texture_type == ETextureType.Tex3D:
+                    tmp['3d_depth'] = texture_entry.tex_3d_depth
+                elif texture_entry.texture_type == ETextureType.Tex2DArray:
+                    tmp['layers'] = texture_entry.layer_count
+
+                add(tmp)
+
             elif isinstance(value, EntryReference):
                 if value.ref is not None:
                     add(cls.add_object(value.ref))

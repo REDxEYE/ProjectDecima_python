@@ -98,6 +98,7 @@ class TexturePixelFormat(IntEnum):
 
 class TextureEntry:
     def __init__(self):
+        self.uuid = UUID(int=0)
         self.texture_type = ETextureType.Tex2D
         self.width = 0
         self.height = 0
@@ -155,15 +156,23 @@ class TextureEntry:
             TexturePixelFormat.BC5U: ('RGBA', ('bcn', 5, 0), 1),
             TexturePixelFormat.BC7: ('RGBA', ('bcn', 7, 0), 1),
         }
-        if self.stream:
-            if self.pixel_format in pixel_type:
-                pixel_info = pixel_type[self.pixel_format]
-                size = int(pixel_info[2] * self.width * self.height)
+        if self.pixel_format in pixel_type:
+            pixel_info = pixel_type[self.pixel_format]
+            size = int(pixel_info[2] * self.width * self.height)
+            if self.stream:
                 im = Image.frombuffer(pixel_info[0], (self.width, self.height),
                                       self.stream.stream_reader.read_bytes(size),
                                       *pixel_info[1])
                 im.save(base_dir / (self.stream.stream_path + '.tga'))
-
+                print(f'Exported texture: {base_dir / (self.stream.stream_path + ".tga")}')
+            elif len(self.data_buffer) > 0:
+                im = Image.frombuffer(pixel_info[0], (self.width, self.height),
+                                      self.data_buffer,
+                                      *pixel_info[1])
+                im.save(base_dir / (str(self.uuid) + '.tga'))
+                print(f'Exported texture: {base_dir / (str(self.uuid) + ".tga")}')
+        else:
+            print(f'Unsupported texture format {self.pixel_format.name}({self.pixel_format.value})')
 
 
 class Texture(Resource):
@@ -176,10 +185,14 @@ class Texture(Resource):
     def parse(self, reader: ByteIODS, core_file):
         super().parse(reader, core_file)
         self.texture_item.parse(reader)
+        self.texture_item.uuid = self.guid
+
+    @property
+    def streamed(self):
+        return self.texture_item.stream_size > 0
 
     def export(self, path: str):
         self.texture_item.export(path)
-
 
 
 EntryTypeManager.register_handler(Texture)
