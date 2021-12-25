@@ -16,6 +16,9 @@ def split(array, n=3):
     return [array[i:i + n] for i in range(0, len(array), n)]
 
 
+FILE_OR_BINARY_DATA_OR_PATH = Union[Union[str, Path], BinaryIO, Union[bytes, bytearray]]
+
+
 class ByteIO:
     @contextlib.contextmanager
     def save_current_pos(self):
@@ -23,16 +26,12 @@ class ByteIO:
         yield
         self.seek(entry)
 
-    def __init__(self, path_or_file_or_data: Union[Union[str, Path], BinaryIO, Union[bytes, bytearray]] = None,
-                 open_to_read=True):
-        if type(path_or_file_or_data) is BinaryIO:
-            file = path_or_file_or_data
-            self.file = file
-        elif type(path_or_file_or_data) is str or isinstance(path_or_file_or_data, Path):
-            mode = 'rb' if open_to_read else 'wb'
+    def __init__(self, path_or_file_or_data: FILE_OR_BINARY_DATA_OR_PATH = None, mode='rb'):
+        if isinstance(path_or_file_or_data, (BinaryIO,)):
+            self.file = path_or_file_or_data
+        elif isinstance(path_or_file_or_data, (str, Path)):
             self.file = open(path_or_file_or_data, mode)
-
-        elif type(path_or_file_or_data) in [bytes, bytearray]:
+        elif isinstance(path_or_file_or_data, (bytes, bytearray)):
             self.file = io.BytesIO(path_or_file_or_data)
         else:
             self.file = BytesIO()
@@ -224,6 +223,9 @@ class ByteIO:
     def _write(self, data):
         self.file.write(data)
 
+    def write_fmt(self, fmt, *args):
+        return self.write(fmt, args)
+
     def write(self, t, value):
         self._write(struct.pack(t, value))
 
@@ -253,6 +255,9 @@ class ByteIO:
 
     def write_float(self, value):
         self.write('f', value)
+
+    def write_float16(self, value):
+        self.write('e', value)
 
     def write_double(self, value):
         self.write('d', value)
@@ -292,24 +297,3 @@ class ByteIO:
 
     def __bool__(self):
         return self.tell() < self.size()
-
-
-if __name__ == '__main__':
-    a = ByteIO(r'./test.bin')
-    a.write_fourcc("IDST")
-    # a.write_int8(108)
-    # a.write_uint32(104)
-    # a.write_to_offset(1024,a.write_uint32,84,True)
-    # a.write_double(15.58)
-    # a.write_float(18.58)
-    # a.write_uint64(18564846516)
-    # a.write_ascii_string('Test123')
-    a.close()
-    a = ByteIO(open(r'./test.bin', mode='rb'))
-    print(a.peek_uint32())
-    # print(a.read_from_offset(1024,a.read_uint32))
-    # print(a.read_uint32())
-    # print(a.read_double())
-    # print(a.read_float())
-    # print(a.read_uint64())
-    # print(a.read_ascii_string())

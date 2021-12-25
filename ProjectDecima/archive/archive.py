@@ -1,5 +1,4 @@
 from functools import lru_cache
-from io import FileIO
 from pathlib import Path
 from enum import IntEnum
 from struct import pack, unpack
@@ -7,11 +6,8 @@ from typing import List, Dict, Union, BinaryIO
 
 import numpy as np
 
-from ..core.entry_reference import EntryReference
-from ..core.stream_reference import StreamingDataSource
 from ..utils.byte_io_ds import ByteIODS
-from ..constants import encryption_key_1
-from ..core.core_file import CoreFile
+from ..constants import ENCRYPTION_KEY_1
 from ..utils.chunk_utils import calculate_first_containing_chunk, calculate_last_containing_chunk
 from ..utils.decryption import decrypt, hash_string, decrypt_chunk_data
 from ..utils.oodle_wrapper import Oodle
@@ -59,9 +55,9 @@ class ArchiveHeader:
         file.write(data)
 
     def decrypt(self, data):
-        input_key = [pack('4I', self.key, encryption_key_1[1], encryption_key_1[2], encryption_key_1[3]),
-                     pack('4I', self.key + 1, encryption_key_1[1], encryption_key_1[2], encryption_key_1[3])]
-        data = np.array(data, dtype=np.uint32)
+        input_key = [pack('4I', self.key, ENCRYPTION_KEY_1[1], ENCRYPTION_KEY_1[2], ENCRYPTION_KEY_1[3]),
+                     pack('4I', self.key + 1, ENCRYPTION_KEY_1[1], ENCRYPTION_KEY_1[2], ENCRYPTION_KEY_1[3])]
+        # data = np.array(data, dtype=np.uint32)
         data = decrypt(input_key, data)
 
         (self.file_size, self.data_size, self.content_table_size,
@@ -106,12 +102,11 @@ class ArchiveChunk:
 
     def decrypt(self, data):
         key_0 = data[3]
-        input_key = [pack('4I', data[3], encryption_key_1[1], encryption_key_1[2], encryption_key_1[3]),
-                     pack('4I', data[7], encryption_key_1[1], encryption_key_1[2], encryption_key_1[3])]
-        data = np.array(data, dtype=np.uint32)
+        input_key = (pack('4I', data[3], ENCRYPTION_KEY_1[1], ENCRYPTION_KEY_1[2], ENCRYPTION_KEY_1[3]),
+                     pack('4I', data[7], ENCRYPTION_KEY_1[1], ENCRYPTION_KEY_1[2], ENCRYPTION_KEY_1[3]))
         data = decrypt(input_key, data)
 
-        (self.uncompressed_offset, self.uncompressed_size, self.key_0, self.compressed_offset, self.compressed_size,
+        (self.uncompressed_offset, self.uncompressed_size, _, self.compressed_offset, self.compressed_size,
          self.key_1) = unpack('Q2IQ2I', pack('8I', *data))
         self.key_0 = key_0
 
@@ -149,9 +144,8 @@ class ArchiveEntry:
         file.write(data)
 
     def decrypt(self, data):
-        input_key = [pack('4I', data[1], encryption_key_1[1], encryption_key_1[2], encryption_key_1[3]),
-                     pack('4I', data[7], encryption_key_1[1], encryption_key_1[2], encryption_key_1[3])]
-        data = np.array(data, dtype=np.uint32, copy=False)
+        input_key = (pack('4I', data[1], ENCRYPTION_KEY_1[1], ENCRYPTION_KEY_1[2], ENCRYPTION_KEY_1[3]),
+                     pack('4I', data[7], ENCRYPTION_KEY_1[1], ENCRYPTION_KEY_1[2], ENCRYPTION_KEY_1[3]))
         data = decrypt(input_key, data)
 
         (self.entry_id, self.key_0, self.hash, self.offset, self.size, self.key_1) = unpack('2I2Q2I', pack('8I', *data))
@@ -248,19 +242,11 @@ class Archive:
 
         return decompressed_data[file_position:file_position + entry.size]
 
-    def queue_file(self, file_id: Union[str, int], is_core_file=True):
+    def queue_file(self, file_id: Union[str, int]):
         if isinstance(file_id, str):
-            file_name = file_id
             file_id = hash_string(file_id)
-        else:
-            file_name = str(file_id)
         file_entry = self.hash_to_entry.get(file_id, None)
         if file_entry:
-            if is_core_file:
-                core_file = CoreFile(self.get_file_data(file_entry), file_name)
-                core_file.parse()
-                return core_file
-            else:
-                return self.get_file_data(file_entry)
+            return self.get_file_data(file_entry)
 
         return None

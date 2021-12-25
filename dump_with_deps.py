@@ -2,10 +2,10 @@ import os
 from pathlib import Path
 from typing import List
 
-from ProjectDecima import ArchiveManager, CoreFile, Archive
+from ProjectDecima import ArchiveManager, CoreFile
 from ProjectDecima.core.core_entry_handler_manager import EntryTypeManager
-from ProjectDecima.core.entry_reference import EntryReference, LoadMethod
-from ProjectDecima.core.stream_reference import StreamingDataSource
+from ProjectDecima.core.pod.entry_reference import RTTIRef, LoadMethod
+from ProjectDecima.core.pod.stream_reference import StreamingDataSource
 
 dumped_files = []
 
@@ -30,8 +30,8 @@ def dump_core_file(dump_path: Path, core_file: CoreFile):
     dump_file(dump_path, core_file)
     for entry in file.entries:
         for k, v in entry.__dict__.items():
-            if isinstance(v, EntryReference):
-                v: EntryReference
+            if isinstance(v, RTTIRef):
+                v: RTTIRef
                 if v._core_file is not None and v.load_method in [LoadMethod.ImmediateCoreFile, LoadMethod.CoreFile]:
                     dump_core_file(dump_dir, v._core_file)
             elif isinstance(v, StreamingDataSource):
@@ -47,8 +47,8 @@ def dump_core_file(dump_path: Path, core_file: CoreFile):
                     with (dump_path / (str(v.stream_path) + '.core.stream')).open('wb') as f:
                         v.stream_reader.seek(0)
                         f.write(v.stream_reader.read_bytes(-1))
-            elif isinstance(v, list) and len(v) > 0 and isinstance(v[0], EntryReference):
-                v: List[EntryReference]
+            elif isinstance(v, list) and len(v) > 0 and isinstance(v[0], RTTIRef):
+                v: List[RTTIRef]
                 for ref in v:
                     if ref._core_file is not None and ref.load_method in [LoadMethod.ImmediateCoreFile,
                                                                           LoadMethod.CoreFile]:

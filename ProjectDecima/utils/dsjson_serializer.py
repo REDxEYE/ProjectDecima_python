@@ -4,11 +4,11 @@ from pathlib import Path
 from uuid import UUID
 
 from .byte_io import ByteIO
-from ..core.entry_reference import EntryReference
+from ProjectDecima.core.pod.entry_reference import RTTIRef
 from ..core.entry_types.rtti_object import RTTIRefObject
-from ..core.entry_types.texture import Texture, TextureEntry, ETextureType
+from ..core.entry_types.texture import Texture, ETextureType
 from ..core.pod.strings import HashedString, UnHashedString
-from ..core.stream_reference import StreamingDataSource
+from ProjectDecima.core.pod.stream_reference import StreamingDataSource
 
 
 class DSJsonSerializer:
@@ -90,7 +90,7 @@ class DSJsonSerializer:
 
                 add(tmp)
 
-            elif isinstance(value, EntryReference):
+            elif isinstance(value, RTTIRef):
                 if value.ref is not None:
                     add(cls.add_object(value.ref))
                 elif value.load_method == 0:

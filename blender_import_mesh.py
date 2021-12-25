@@ -6,9 +6,8 @@ cur_path = Path(__file__).parent
 sys.path.append(cur_path)
 
 from ProjectDecima.archive.archive_manager import ArchiveManager
-from ProjectDecima.core.entry_reference import EntryReference
-from . import *
-from ProjectDecima.core.stream_reference import StreamReference
+from ProjectDecima.core.pod.entry_reference import RTTIRef
+from ProjectDecima.core.pod.stream_reference import StreamReference
 import numpy as np
 
 vertex_dtype = np.dtype([('pos', np.float32, (3,)), ('bone_ids', np.uint8, (8,)), ('weights', np.uint8, (8,))])
@@ -52,7 +51,7 @@ ar_set.parse_all()
 mesh_path = input("Mesh path:")
 core_file = ar_set.queue_file(mesh_path, True)
 StreamReference.resolve(ar_set)
-EntryReference.resolve(ar_set)
+RTTIRef.resolve(ar_set)
 model_entries = core_file.get_entries_by_type(LodMeshResource)
 for model_entry in model_entries:
     model_entry: LodMeshResource

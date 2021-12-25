@@ -26,9 +26,9 @@ def main():
         for entry in file.entries:
             if not entry.exportable:
                 continue
-            DSJsonSerializer.begin(dump_dir,file_dump_path.with_suffix('.ds_json'))
+            DSJsonSerializer.begin(dump_dir, file_dump_path.with_suffix('.ds_json'))
             DSJsonSerializer.add_object(entry)
-            with file_dump_path.with_suffix('.ds_json').open('w',encoding='utf-8') as f:
+            with file_dump_path.with_suffix('.ds_json').open('w', encoding='utf-8') as f:
                 import json
                 json.dump(DSJsonSerializer.finalize(), f, indent=1, ensure_ascii=False)
 
